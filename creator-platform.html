@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创作者平台 - 海棠春
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E94560', // 主色调：红色，代表悬疑和激情
+                        secondary: '#1A1A2E', // 辅助色：深蓝，代表神秘感
+                        tertiary: '#16213E', // 第三色：暗蓝，代表沉浸感
+                        accent: '#FFC107', // 强调色：金色，代表重要元素
+                        neutral: '#F5F5F5', // 中性色：浅灰，用于背景
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    }
+                },
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities { .content-auto { content-visibility: auto; } .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.3); } .text-shadow-lg { text-shadow: 0 4px 8px rgba(0,0,0,0.5); } .bg-gradient-overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.2),
+        rgba(0,0,0,0.7)); } .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; } }
+    </style>
+</head>
+
+<body class="font-inter bg-neutral text-gray-800 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <span class="text-primary text-2xl sm:text-3xl">🔪</span>
+                    <span class="text-xl sm:text-2xl font-bold text-white">剧本杀之家</span>
+                </div>
+
+                <!-- 桌面导航 -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="index.html" class="text-white hover:text-primary transition-colors font-medium">首页</a>
+                    <a href="script-library.html" class="text-white hover:text-primary transition-colors font-medium">剧本库</a>
+                    <a href="session-hall.html" class="text-white hover:text-primary transition-colors font-medium">组局大厅</a>
+                    <a href="creator-platform.html" class="text-primary hover:text-primary/80 transition-colors font-medium">创作者平台</a>
+                    <a href="newbie-guide.html" class="text-white hover:text-primary transition-colors font-medium">新手教程</a>
+                    <a href="about-us.html" class="text-white hover:text-primary transition-colors font-medium">关于我们</a>
+                </nav>
+
+                <!-- 用户操作区 -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative hidden sm:block">
+                        <input type="text" placeholder="搜索创作者..." class="bg-white/10 backdrop-blur-sm text-white placeholder-white/60 pl-10 pr-4 py-2 rounded-full w-48 lg:w-64 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                    </div>
+                    <button id="loginButton" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full transition-all flex items-center space-x-1">
+                        <i class="fa fa-user-circle"></i>
+                        <span class="hidden sm:inline">登录/注册</span>
+                    </button>
+                    <!-- 移动端菜单按钮 -->
+                    <button id="mobileMenuButton" class="md:hidden text-white text-xl">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 移动端导航菜单 -->
+        <div id="mobileMenu" class="md:hidden bg-secondary/95 backdrop-blur-md absolute w-full left-0 top-full transform -translate-y-full opacity-0 transition-all duration-300 pointer-events-none">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex flex-col space-y-4">
+                    <a href="index.html" class="text-white hover:text-primary transition-colors font-medium py-2">首页</a>
+                    <a href="script-library.html" class="text-white hover:text-primary transition-colors font-medium py-2">剧本库</a>
+                    <a href="session-hall.html" class="text-white hover:text-primary transition-colors font-medium py-2">组局大厅</a>
+                    <a href="creator-platform.html" class="text-primary hover:text-primary/80 transition-colors font-medium py-2">创作者平台</a>
+                    <a href="newbie-guide.html" class="text-white hover:text-primary transition-colors font-medium py-2">新手教程</a>
+                    <a href="about-us.html" class="text-white hover:text-primary transition-colors font-medium py-2">关于我们</a>
+                    <div class="relative mt-2">
+                        <input type="text" placeholder="搜索创作者..." class="bg-white/10 backdrop-blur-sm text-white placeholder-white/60 pl-10 pr-4 py-2 rounded-full w-full focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">用户登录</h3>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-user"></i>
+                            </span>
+                            <input type="text" id="username" placeholder="请输入用户名" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-lock"></i>
+                            </span>
+                            <input type="password" id="password" placeholder="请输入密码" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <button type="button" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all">登录</button>
+                </form>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p class="text-center text-sm text-gray-600">还没有账号？<a href="#" class="text-primary hover:underline">立即注册</a></p>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="social-icon bg-[#07C160]/10 hover:bg-[#07C160]/20 text-[#07C160] p-2 rounded-full transition-all">
+                            <i class="fa fa-weixin text-xl"></i>
+                        </button>
+                        <button class="social-icon bg-[#E6162D]/10 hover:bg-[#E6162D]/20 text-[#E6162D] p-2 rounded-full transition-all">
+                            <i class="fa fa-weibo text-xl"></i>
+                        </button>
+                        <button class="social-icon bg-[#12B7F5]/10 hover:bg-[#12B7F5]/20 text-[#12B7F5] p-2 rounded-full transition-all">
+                            <i class="fa fa-qq text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面标题区 -->
+    <section class="relative h-40 md:h-60 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-secondary to-tertiary"></div>
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center relative z-10">
+            <div>
+                <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-white text-shadow-lg">创作者平台</h1>
+                <p class="text-white/80 mt-2">释放你的创作灵感，分享精彩剧本</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 面包屑导航 -->
+    <section class="py-4 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center text-sm text-gray-600">
+                <a href="index.html" class="hover:text-primary">首页</a>
+                <span class="mx-2">/</span>
+                <span class="text-primary">创作者平台</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 创作者平台内容区 -->
+    <section class="py-10 bg-neutral">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- 创作者统计卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">本月热门创作者</p>
+                            <h3 class="text-2xl font-bold mt-1">328</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                            <i class="fa fa-trophy text-primary text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-green-500 text-sm">
+                        <i class="fa fa-arrow-up mr-1"></i>
+                        <span>12.5%</span>
+                        <span class="text-gray-500 ml-1">较上月</span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">本月新增剧本</p>
+                            <h3 class="text-2xl font-bold mt-1">1,254</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
+                            <i class="fa fa-book text-secondary text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-green-500 text-sm">
+                        <i class="fa fa-arrow-up mr-1"></i>
+                        <span>8.3%</span>
+                        <span class="text-gray-500 ml-1">较上月</span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">总下载量</p>
+                            <h3 class="text-2xl font-bold mt-1">128,549</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center">
+                            <i class="fa fa-download text-accent text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-green-500 text-sm">
+                        <i class="fa fa-arrow-up mr-1"></i>
+                        <span>15.7%</span>
+                        <span class="text-gray-500 ml-1">较上月</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 创作者中心和热门剧本 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 左侧创作者中心 -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- 热门创作者 -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold">热门创作者</h2>
+                            <a href="#" class="text-primary hover:underline">查看全部</a>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="flex items-center">
+                                <img src="https://picsum.photos/id/1001/100/100" alt="创作者头像" class="w-16 h-16 rounded-full object-cover mr-4">
+                                <div>
+                                    <h3 class="font-semibold">墨染剧本工作室</h3>
+                                    <p class="text-gray-500 text-sm">作品：24 | 总下载：32,548</p>
+                                    <div class="flex items-center mt-2">
+                                        <span class="text-yellow-500 flex items-center">
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star-half-o"></i>
+                                        </span>
+                                        <span class="text-gray-500 text-sm ml-2">4.7</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <img src="https://picsum.photos/id/1002/100/100" alt="创作者头像" class="w-16 h-16 rounded-full object-cover mr-4">
+                                <div>
+                                    <h3 class="font-semibold">推理大师</h3>
+                                    <p class="text-gray-500 text-sm">作品：18 | 总下载：28,765</p>
+                                    <div class="flex items-center mt-2">
+                                        <span class="text-yellow-500 flex items-center">
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star-o"></i>
+                                        </span>
+                                        <span class="text-gray-500 text-sm ml-2">4.2</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <img src="https://picsum.photos/id/1003/100/100" alt="创作者头像" class="w-16 h-16 rounded-full object-cover mr-4">
+                                <div>
+                                    <h3 class="font-semibold">剧游天下</h3>
+                                    <p class="text-gray-500 text-sm">作品：32 | 总下载：25,432</p>
+                                    <div class="flex items-center mt-2">
+                                        <span class="text-yellow-500 flex items-center">
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                        </span>
+                                        <span class="text-gray-500 text-sm ml-2">4.9</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <img src="https://picsum.photos/id/1004/100/100" alt="创作者头像" class="w-16 h-16 rounded-full object-cover mr-4">
+                                <div>
+                                    <h3 class="font-semibold">迷雾剧场</h3>
+                                    <p class="text-gray-500 text-sm">作品：15 | 总下载：21,876</p>
+                                    <div class="flex items-center mt-2">
+                                        <span class="text-yellow-500 flex items-center">
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star-half-o"></i>
+                                        </span>
+                                        <span class="text-gray-500 text-sm ml-2">4.6</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 创作者活动 -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold">创作活动</h2>
+                            <a href="#" class="text-primary hover:underline">查看全部</a>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="border-l-4 border-primary pl-4 py-2">
+                                <div class="flex justify-between">
+                                    <h3 class="font-semibold">悬疑推理剧本创作大赛</h3>
+                                    <span class="text-sm bg-red-100 text-red-800 px-2 py-1 rounded-full">进行中</span>
+                                </div>
+                                <p class="text-gray-600 mt-2">提交你的悬疑推理剧本，有机会获得最高5000元奖金和出版机会！</p>
+                                <div class="flex items-center text-sm text-gray-500 mt-2">
+                                    <span class="flex items-center mr-4"><i class="fa fa-calendar mr-1"></i> 截止日期: 2025-07-30</span>
+                                    <span class="flex items-center"><i class="fa fa-users mr-1"></i> 已参与: 216人</span>
+                                </div>
+                            </div>
+
+                            <div class="border-l-4 border-gray-300 pl-4 py-2">
+                                <div class="flex justify-between">
+                                    <h3 class="font-semibold">新手创作训练营</h3>
+                                    <span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">即将开始</span>
+                                </div>
+                                <p class="text-gray-600 mt-2">为期两周的新手创作培训，从故事结构到人物塑造，全方位指导！</p>
+                                <div class="flex items-center text-sm text-gray-500 mt-2">
+                                    <span class="flex items-center mr-4"><i class="fa fa-calendar mr-1"></i> 开始日期: 2025-07-15</span>
+                                    <span class="flex items-center"><i class="fa fa-users mr-1"></i> 已报名: 87人</span>
+                                </div>
+                            </div>
+
+                            <div class="border-l-4 border-gray-300 pl-4 py-2">
+                                <div class="flex justify-between">
+                                    <h3 class="font-semibold">恐怖剧本主题征集</h3>
+                                    <span class="text-sm bg-gray-100 text-gray-800 px-2 py-1 rounded-full">已结束</span>
+                                </div>
+                                <p class="text-gray-600 mt-2">以"午夜凶铃"为主题的恐怖剧本征集活动，获奖作品将在平台首页推荐！</p>
+                                <div class="flex items-center text-sm text-gray-500 mt-2">
+                                    <span class="flex items-center mr-4"><i class="fa fa-calendar mr-1"></i> 结束日期: 2025-06-10</span>
+                                    <span class="flex items-center"><i class="fa fa-trophy mr-1"></i> 获奖者已公布</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 创作指南 -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold">创作指南</h2>
+                            <a href="#" class="text-primary hover:underline">更多指南</a>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="p-4 border border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fa fa-lightbulb-o text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium">如何构思一个好的剧本杀故事</h3>
+                                        <p class="text-gray-500 text-sm mt-1">掌握故事构思技巧，打造引人入胜的剧情</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-4 border border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fa fa-user-secret text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium">角色设计的五大要素</h3>
+                                        <p class="text-gray-500 text-sm mt-1">如何塑造立体、有深度的角色</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-4 border border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fa fa-puzzle-piece text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium">线索设计的艺术</h3>
+                                        <p class="text-gray-500 text-sm mt-1">如何巧妙设置线索，引导玩家推理</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-4 border border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fa fa-book text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium">剧本杀文档格式规范</h3>
+                                        <p class="text-gray-500 text-sm mt-1">了解平台要求的标准剧本格式</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧创作者资源 -->
+                <div class="space-y-8">
+                    <!-- 创作者申请 -->
+                    <div class="bg-gradient-to-br from-primary to-tertiary rounded-xl shadow-md p-6 text-white">
+                        <h2 class="text-xl font-bold mb-4">成为创作者</h2>
+                        <p class="mb-6">分享你的创意，赚取收益，结识志同道合的朋友！</p>
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle mt-1 mr-2"></i>
+                                <span>发布你的原创剧本，获取下载分成</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle mt-1 mr-2"></i>
+                                <span>参与平台活动，赢取丰厚奖金</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle mt-1 mr-2"></i>
+                                <span>获得专业指导，提升创作水平</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle mt-1 mr-2"></i>
+                                <span>结识行业大咖，拓展创作人脉</span>
+                            </li>
+                        </ul>
+                        <button class="w-full bg-white text-primary hover:bg-white/90 font-medium py-2 px-4 rounded-lg transition-all">
+                            立即申请
+                        </button>
+                    </div>
+
+                    <!-- 热门剧本类型 -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h2 class="text-xl font-bold mb-4">热门剧本类型</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fa fa-search text-red-600"></i>
+                                    </div>
+                                    <span>硬核推理</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-gray-500 text-sm mr-2">64%</span>
+                                    <div class="w-20 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-red-500 h-2 rounded-full" style="width: 64%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fa fa-heart text-blue-600"></i>
+                                    </div>
+                                    <span>情感沉浸</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-gray-500 text-sm mr-2">58%</span>
+                                    <div class="w-20 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-500 h-2 rounded-full" style="width: 58%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fa fa-bomb text-purple-600"></i>
+                                    </div>
+                                    <span>恐怖惊悚</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-gray-500 text-sm mr-2">45%</span>
+                                    <div class="w-20 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-purple-500 h-2 rounded-full" style="width: 45%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fa fa-gamepad text-green-600"></i>
+                                    </div>
+                                    <span>机制阵营</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-gray-500 text-sm mr-2">38%</span>
+                                    <div class="w-20 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 38%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fa fa-smile-o text-yellow-600"></i>
+                                    </div>
+                                    <span>欢乐撕逼</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-gray-500 text-sm mr-2">32%</span>
+                                    <div class="w-20 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 32%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 收益数据 -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h2 class="text-xl font-bold mb-4">收益数据</h2>
+                        <div class="mb-6">
+                            <canvas id="revenueChart" height="200"></canvas>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500 text-sm">本月收益</p>
+                                <p class="text-xl font-bold text-primary">¥12,845</p>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500 text-sm">总收益</p>
+                                <p class="text-xl font-bold text-secondary">¥86,723</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 创作资源 -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h2 class="text-xl font-bold mb-4">创作资源
