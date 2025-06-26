@@ -1,0 +1,62 @@
+@layer utilities {
+    .content-auto {
+        content-visibility: auto;
+    }
+    .text-shadow {
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .text-shadow-lg {
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+    .bg-gradient-overlay {
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.7));
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+}
+
+
+/* Tailwind 配置 */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 这里可以添加 Tailwind 配置的颜色、字体、阴影等扩展 */
+
+:root {
+    --primary: #E94560;
+    --secondary: #1A1A2E;
+    --tertiary: #16213E;
+    --accent: #FFC107;
+    --neutral: #F5F5F5;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--neutral);
+    color: #4b5563;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* 导航栏样式 */
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    transition: all 0.3s ease;
+}
+
+
+/* 其他样式可以根据需要进一步提取和整理 */

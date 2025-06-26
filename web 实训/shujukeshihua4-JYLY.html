@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据可视化雷达图 - 剧本杀对比分析</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <!-- 配置 Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5', // 主色调：深蓝（代表信任与专业）
+                        secondary: '#EC4899', // 辅助色：粉紫（代表创意与娱乐）
+                        neutral: '#1F2937', // 中性色：深灰
+                        'neutral-light': '#F3F4F6', // 浅灰背景
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities { .content-auto { content-visibility: auto; } .card-shadow { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); } .chart-container { transition: all 0.3s ease; } .chart-container:hover { transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); } .stat-card { transition: all 0.3s ease; } .stat-card:hover { transform: scale(1.02); } }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-inter text-neutral">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-chart-radar text-primary text-2xl mr-3"></i>
+                    <span class="text-xl font-bold">DataViz</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-primary font-medium hover:text-primary/80 transition-colors">首页</a>
+                    <a href="#" class="text-gray-600 hover:text-primary transition-colors">图表库</a>
+                    <a href="#" class="text-gray-600 hover:text-primary transition-colors">关于我们</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- 页面标题 -->
+        <div class="mb-8 text-center">
+            <h1 class="text-[clamp(2rem,5vw,3rem)] font-bold text-neutral mb-2">剧本杀多维度对比分析</h1>
+            <p class="text-gray-600 max-w-3xl mx-auto">通过雷达图直观对比不同剧本杀的各个维度表现，帮助玩家选择符合期望的剧本，助力店家优化内容。</p>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 card-shadow stat-card border-l-4 border-primary">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">已分析剧本</p>
+                        <h3 class="text-3xl font-bold text-neutral mt-1">324</h3>
+                        <p class="text-gray-500 text-sm mt-2">覆盖200+发行商的热门作品</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <i class="fa-solid fa-book text-primary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow stat-card border-l-4 border-secondary">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">评分维度</p>
+                        <h3 class="text-3xl font-bold text-neutral mt-1">8个</h3>
+                        <p class="text-gray-500 text-sm mt-2">剧情、推理、沉浸、机制等多方面评估</p>
+                    </div>
+                    <div class="bg-pink-100 p-3 rounded-lg">
+                        <i class="fa-solid fa-star text-secondary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow stat-card border-l-4 border-green-500">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">用户满意度</p>
+                        <h3 class="text-3xl font-bold text-neutral mt-1">94%</h3>
+                        <p class="text-green-500 text-sm mt-2 flex items-center">
+                            <i class="fa-solid fa-arrow-up mr-1"></i> 2% <span class="text-gray-500 ml-1">vs 上季度</span>
+                        </p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <i class="fa-solid fa-thumbs-up text-green-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据卡片和图表 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 雷达图区域 1：热门剧本对比 -->
+            <div class="bg-white rounded-xl p-6 card-shadow chart-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-neutral">热门剧本多维度对比</h2>
+                    <div class="flex space-x-2">
+                        <button id="compare-btn" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">
+              <i class="fa-solid fa-refresh mr-1"></i> 随机更换
+            </button>
+                    </div>
+                </div>
+                <div class="h-[400px]" id="popularChart"></div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>基于2000+玩家评分，满分为10分</p>
+                </div>
+            </div>
+
+            <!-- 雷达图区域 2：类型对比 -->
+            <div class="bg-white rounded-xl p-6 card-shadow chart-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-neutral">不同类型剧本特点</h2>
+                    <div class="flex space-x-2">
+                        <button id="type-btn" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">
+              <i class="fa-solid fa-refresh mr-1"></i> 切换维度
+            </button>
+                    </div>
+                </div>
+                <div class="h-[400px]" id="typeChart"></div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>不同类型剧本在各维度的平均表现，满分为10分</p>
+                </div>
+            </div>
+
+            <!-- 雷达图区域 3：玩家偏好对比 -->
+            <div class="bg-white rounded-xl p-6 card-shadow chart-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-neutral">不同玩家群体偏好</h2>
+                    <div class="flex space-x-2">
+                        <button id="player-btn" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">
+              <i class="fa-solid fa-refresh mr-1"></i> 切换群体
+            </button>
+                    </div>
+                </div>
+                <div class="h-[400px]" id="playerChart"></div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>不同玩家群体对各维度的重视程度，满分为10分</p>
+                </div>
+            </div>
+
+            <!-- 雷达图区域 4：季度趋势 -->
+            <div class="bg-white rounded-xl p-6 card-shadow chart-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-neutral">剧本质量季度趋势</h2>
+                    <div class="flex space-x-2">
+                        <button id="trend-btn" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">
+              <i class="fa-solid fa-refresh mr-1"></i> 切换维度
+            </button>
+                    </div>
+                </div>
+                <div class="h-[400px]" id="trendChart"></div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>近四个季度新发行剧本在各维度的平均表现，满分为10分</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据洞察 -->
+        <div class="mt-12 bg-white rounded-xl p-6 card-shadow">
+            <h2 class="text-xl font-semibold text-neutral mb-4">数据洞察与趋势分析</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-primary">
+                    <h3 class="font-medium text-primary mb-2"><i class="fa-solid fa-lightbulb mr-2"></i>玩家偏好</h3>
+                    <p class="text-gray-700">年轻玩家更看重剧情和沉浸感，而高玩群体对推理难度和创新性要求更高。</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-secondary">
+                    <h3 class="font-medium text-secondary mb-2"><i class="fa-solid fa-chart-line mr-2"></i>行业趋势</h3>
+                    <p class="text-gray-700">机制本和阵营本的市场份额持续增长，情感本的沉浸度评分提升明显。</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                    <h3 class="font-medium text-green-600 mb-2"><i class="fa-solid fa-target mr-2"></i>改进方向</h3>
+                    <p class="text-gray-700">当前剧本普遍在创新性和平衡性上还有提升空间，发行商可重点关注这两个维度。</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-neutral text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-chart-radar text-primary text-2xl mr-3"></i>
+                        <span class="text-xl font-bold">DataViz</span>
+                    </div>
+                    <p class="text-gray-400 mt-2">用数据驱动剧本杀行业发展</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-brands fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-brands fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-brands fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-gray-700 text-center text-gray-400 text-sm">
+                <p>© 2024 DataViz. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 雷达图通用配置
+            const radarCommonOptions = {
+                backgroundColor: '#ffffff',
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    textStyle: {
+                        color: '#1F2937'
+                    },
+                    borderColor: '#E5E7EB',
+                    borderWidth: 1
+                },
+                legend: {
+                    type: 'scroll',
+                    orient: 'horizontal',
+                    bottom: 10,
+                    textStyle: {
+                        color: '#6B7280'
+                    },
+                    pageIconColor: '#4F46E5',
+                    pageTextStyle: {
+                        color: '#6B7280'
+                    }
+                },
+                radar: {
+                    splitNumber: 5,
+                    shape: 'polygon',
+                    axisName: {
+                        color: '#6B7280',
+                        fontSize: 12
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: '#E5E7EB'
+                        }
+                    },
+                    splitArea: {
+                        areaStyle: {
+                            color: ['rgba(245, 245, 245, 0.3)', 'rgba(230, 230, 230, 0.3)',
+                                'rgba(215, 215, 215, 0.3)', 'rgba(200, 200, 200, 0.3)',
+                                'rgba(185, 185, 185, 0.3)'
+                            ]
+                        }
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#9CA3AF'
+                        }
+                    }
+                },
+                animationDuration: 1000,
+                animationEasing: 'elasticOut'
+            };
+
+            // 热门剧本对比数据
+            const popularData = {
+                dimensions: [{
+                    name: '剧情',
+                    max: 10
+                }, {
+                    name: '推理难度',
+                    max: 10
+                }, {
+                    name: '沉浸感',
+                    max: 10
+                }, {
+                    name: '机制设计',
+                    max: 10
+                }, {
+                    name: '角色塑造',
+                    max: 10
+                }, {
+                    name: '创新性',
+                    max: 10
+                }, {
+                    name: '平衡性',
+                    max: 10
+                }, {
+                    name: '互动性',
+                    max: 10
+                }],
+                series: [{
+                    name: '《金陵风云》',
+                    value: [8.8, 7.2, 9.0, 8.5, 8.9, 7.8, 8.2, 9.1],
+                    color: '#4F46E5'
+                }, {
+                    name: '《雾鸦馆》',
+                    value: [8.2, 9.5, 8.0, 6.5, 8.3, 7.5, 8.0, 7.0],
+                    color: '#EC4899'
+                }, {
+                    name: '《声声慢》',
+                    value: [9.3, 6.0, 9.5, 5.5, 9.2, 7.0, 7.5, 8.0],
+                    color: '#10B981'
+                }, {
+                    name: '《青楼》',
+                    value: [7.5, 6.5, 8.0, 9.0, 7.8, 8.2, 7.0, 9.5],
+                    color: '#F59E0B'
+                }]
+            };
+
+            // 类型对比数据
+            const typeData = {
+                dimensions: [{
+                    name: '剧情',
+                    max: 10
+                }, {
+                    name: '推理',
+                    max: 10
+                }, {
+                    name: '沉浸',
+                    max: 10
+                }, {
+                    name: '欢乐',
+                    max: 10
+                }, {
+                    name: '机制',
+                    max: 10
+                }, {
+                    name: '立意',
+                    max: 10
+                }],
+                series: [{
+                    name: '情感本',
+                    value: [9.2, 6.5, 9.5, 7.0, 6.0, 8.5],
+                    color: '#EC4899'
+                }, {
+                    name: '硬核推理本',
+                    value: [8.5, 9.5, 8.0, 5.0, 6.5, 7.5],
+                    color: '#4F46E5'
+                }, {
+                    name: '恐怖本',
+                    value: [7.5, 7.0, 9.0, 6.0, 6.5, 7.0],
+                    color: '#1F2937'
+                }, {
+                    name: '机制本',
+                    value: [7.0, 6.0, 7.5, 8.5, 9.5, 6.5],
+                    color: '#10B981'
+                }, {
+                    name: '阵营本',
+                    value: [7.5, 6.5, 7.0, 8.0, 9.0, 7.0],
+                    color: '#F59E0B'
+                }]
+            };
+
+            // 玩家偏好数据
+            const playerData = {
+                dimensions: [{
+                    name: '剧情',
+                    max: 10
+                }, {
+                    name: '推理难度',
+                    max: 10
+                }, {
+                    name: '沉浸感',
+                    max: 10
+                }, {
+                    name: '社交互动',
+                    max: 10
+                }, {
+                    name: '机制趣味性',
+                    max: 10
+                }, {
+                    name: '角色扮演',
+                    max: 10
+                }],
+                series: [{
+                    name: '新手玩家',
+                    value: [8.5, 6.0, 8.0, 9.0, 7.5, 7.0],
+                    color: '#4F46E5'
+                }, {
+                    name: '高玩群体',
+                    value: [8.0, 9.5, 7.5, 6.5, 8.0, 8.5],
+                    color: '#EC4899'
+                }, {
+                    name: '情感玩家',
+                    value: [9.5, 5.0, 9.5, 7.0, 5.5, 9.0],
+                    color: '#10B981'
+                }, {
+                    name: '社交玩家',
+                    value: [7.0, 5.0, 6.5, 9.5, 8.5, 7.5],
+                    color: '#F59E0B'
+                }]
+            };
+
+            // 季度趋势数据
+            const trendData = {
+                dimensions: [{
+                    name: '剧情',
+                    max: 10
+                }, {
+                    name: '推理',
+                    max: 10
+                }, {
+                    name: '沉浸',
+                    max: 10
+                }, {
+                    name: '机制',
+                    max: 10
+                }, {
+                    name: '创新',
+                    max: 10
+                }, {
+                    name: '平衡',
+                    max: 10
+                }],
+                series: [{
+                    name: '2023Q4',
+                    value: [8.2, 7.8, 8.0, 7.5, 7.0, 7.2],
+                    color: '#9CA3AF'
+                }, {
+                    name: '2024Q1',
+                    value: [8.3, 7.9, 8.1, 7.7, 7.2, 7.3],
+                    color: '#6B7280'
+                }, {
+                    name: '2024Q2',
+                    value: [8.5, 8.0, 8.3, 8.0, 7.4, 7.5],
+                    color: '#4B5563'
+                }, {
+                    name: '2024Q3',
+                    value: [8.7, 8.1, 8.5, 8.3, 7.6, 7.7],
+                    color: '#1F2937'
+                }]
+            };
+
+            // 创建雷达图函数
+            function createRadarChart(chartId, data) {
+                const chart = echarts.init(document.getElementById(chartId));
+
+                const option = {
+                    ...radarCommonOptions,
+                    radar: {
+                        ...radarCommonOptions.radar,
+                        indicator: data.dimensions
+                    },
+                    series: [{
+                        name: '多维度对比',
+                        type: 'radar',
+                        data: data.series.map(item => ({
+                            value: item.value,
+                            name: item.name,
+                            itemStyle: {
+                                color: item.color
+                            },
+                            areaStyle: {
+                                opacity: 0.2,
+                                color: item.color
+                            },
+                            lineStyle: {
+                                width: 2
+                            }
+                        }))
+                    }]
+                };
+
+                chart.setOption(option);
+                return chart;
+            }
+
+            // 初始化所有图表
+            let popularChart = createRadarChart('popularChart', popularData);
+            let typeChart = createRadarChart('typeChart', typeData);
+            let playerChart = createRadarChart('playerChart', playerData);
+            let trendChart = createRadarChart('trendChart', trendData);
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', function() {
+                popularChart.resize();
+                typeChart.resize();
+                playerChart.resize();
+                trendChart.resize();
+            });
+
+            // 热门剧本切换按钮
+            document.getElementById('compare-btn').addEventListener('click', function() {
+                // 模拟数据更新
+                const newPopularData = {
+                    dimensions: popularData.dimensions,
+                    series: popularData.series.map(item => ({
+                        name: item.name,
+                        value: item.value.map(val => Math.max(5, Math.min(10, val + (Math.random() - 0.5) * 1))),
+                        color: item.color
+                    }))
+                };
+
+                popularChart.setOption({
+                    series: [{
+                        data: newPopularData.series.map(item => ({
+                            value: item.value,
+                            name: item.name,
+                            itemStyle: {
+                                color: item.color
+                            },
+                            areaStyle: {
+                                opacity: 0.2,
+                                color: item.color
+                            },
+                            lineStyle: {
+                                width: 2
+                            }
+                        }))
+                    }]
+                });
+            });
+
+            // 类型切换按钮
+            document.getElementById('type-btn').addEventListener('click', function() {
+                // 切换维度
+                const newTypeData = {
+                    dimensions: [{
+                        name: '剧情',
+                        max: 10
+                    }, {
+                        name: '难度',
+                        max: 10
+                    }, {
+                        name: '时长',
+                        max: 10
+                    }, {
+                        name: '人数适配',
+                        max: 10
+                    }, {
+                        name: '翻台率',
+                        max: 10
+                    }, {
+                        name: '复刷率',
+                        max: 10
+                    }],
+                    series: [{
+                        name: '情感本',
+                        value: [9.2, 6.0, 7.5, 8.0, 6.5, 7.0],
+                        color: '#EC4899'
+                    }, {
+                        name: '硬核推理本',
+                        value: [8.5, 9.5, 9.0, 7.0, 5.0, 8.5],
+                        color: '#4F46E5'
+                    }, {
+                        name: '恐怖本',
+                        value: [7.5, 7.0, 8.0, 8.5, 7.0, 6.5],
+                        color: '#1F2937'
+                    }, {
+                        name: '机制本',
+                        value: [7.0, 6.5, 9.5, 9.0, 8.5, 7.5],
+                        color: '#10B981'
+                    }, {
+                        name: '阵营本',
+                        value: [7.5, 7.0, 9.0, 9.5, 8.0, 8.0],
+                        color: '#F59E0B'
+                    }]
+                };
+
+                typeChart.setOption({
+                    radar: {
+                        indicator: newTypeData.dimensions
+                    },
+                    series: [{
+                        data: newTypeData.series.map(item => ({
+                            value: item.value,
+                            name: item.name,
+                            itemStyle: {
+                                color: item.color
+                            },
+                            areaStyle: {
+                                opacity: 0.2,
+                                color: item.color
+                            },
+                            lineStyle: {
+                                width: 2
+                            }
+                        }))
+                    }]
+                });
+            });
+
+            // 玩家群体切换按钮
+            document.getElementById('player-btn').addEventListener('click', function() {
+                // 切换维度
+                const newPlayerData = {
+                    dimensions: [{
+                        name: '价格敏感度',
+                        max: 10
+                    }, {
+                        name: '时间投入',
+                        max: 10
+                    }, {
+                        name: '主题偏好',
+                        max: 10
+                    }, {
+                        name: '社交需求',
+                        max: 10
+                    }, {
+                        name: '推理能力',
+                        max: 10
+                    }, {
+                        name: '代入感',
+                        max: 10
+                    }],
+                    series: [{
+                        name: '学生群体',
+                        value: [8.5, 7.0, 8.0, 9.0, 6.5, 7.5],
+                        color: '#4F46E5'
+                    }, {
+                        name: '上班族',
+                        value: [6.5, 5.0, 7.5, 8.0, 7.0, 8.0],
+                        color: '#EC4899'
+                    }, {
+                        name: '家庭玩家',
+                        value: [7.0, 6.0, 8.5, 7.5, 6.0, 7.0],
+                        color: '#10B981'
+                    }, {
+                        name: '高玩群体',
+                        value: [5.0, 9.0, 8.0, 6.0, 9.5, 8.5],
+                        color: '#F59E0B'
+                    }]
+                };
+
+                playerChart.setOption({
+                    radar: {
+                        indicator: newPlayerData.dimensions
+                    },
+                    series: [{
+                        data: newPlayerData.series.map(item => ({
+                            value: item.value,
+                            name: item.name,
+                            itemStyle: {
+                                color: item.color
+                            },
+                            areaStyle: {
+                                opacity: 0.2,
+                                color: item.color
+                            },
+                            lineStyle: {
+                                width: 2
+                            }
+                        }))
+                    }]
+                });
+            });
+
+            // 季度趋势切换按钮
+            document.getElementById('trend-btn').addEventListener('click', function() {
+                // 切换维度
+                const newTrendData = {
+                    dimensions: [{
+                        name: '文笔',
+                        max: 10
+                    }, {
+                        name: '逻辑',
+                        max: 10
+                    }, {
+                        name: '机制创新',
+                        max: 10
+                    }, {
+                        name: '美工',
+                        max: 10
+                    }, {
+                        name: 'DM需求',
+                        max: 10
+                    }, {
+                        name: '道具质量',
+                        max: 10
+                    }],
+                    series: [{
+                        name: '2023Q4',
+                        value: [8.0, 8.2, 7.0, 7.5, 7.8, 7.2],
+                        color: '#9CA3AF'
+                    }, {
+                        name: '2024Q1',
+                        value: [8.1, 8.3, 7.3, 7.7, 7.9, 7.4],
+                        color: '#6B7280'
+                    }, {
+                        name: '2024Q2',
+                        value: [8.3, 8.5, 7.6, 8.0, 8.1, 7.6],
+                        color: '#4B5563'
+                    }, {
+                        name: '2024Q3',
+                        value: [8.5, 8.7, 7.9, 8.3, 8.3, 7.9],
+                        color: '#1F2937'
+                    }]
+                };
+
+                trendChart.setOption({
+                    radar: {
+                        indicator: newTrendData.dimensions
+                    },
+                    series: [{
+                        data: newTrendData.series.map(item => ({
+                            value: item.value,
+                            name: item.name,
+                            itemStyle: {
+                                color: item.color
+                            },
+                            areaStyle: {
+                                opacity: 0.2,
+                                color: item.color
+                            },
+                            lineStyle: {
+                                width: 2
+                            }
+                        }))
+                    }]
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

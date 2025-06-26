@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>海棠春 - 沉浸式推理体验平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E94560', // 主色调：红色，代表悬疑和激情
+                        secondary: '#1A1A2E', // 辅助色：深蓝，代表神秘感
+                        tertiary: '#16213E', // 第三色：暗蓝，代表沉浸感
+                        accent: '#FFC107', // 强调色：金色，代表重要元素
+                        neutral: '#F5F5F5', // 中性色：浅灰，用于背景
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    },
+                    animation: {
+                        'fade-in-down': 'fade-in-down 0.3s ease-out forwards',
+                        'fade-out-up': 'fade-out-up 0.3s ease-in forwards',
+                        'scale-in': 'scale-in 0.3s ease-out forwards',
+                        'scale-out': 'scale-out 0.3s ease-in forwards',
+                    },
+                    keyframes: {
+                        'fade-in-down': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(-20px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        },
+                        'fade-out-up': {
+                            '0%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            },
+                            '100%': {
+                                opacity: 0,
+                                transform: 'translateY(-20px)'
+                            }
+                        },
+                        'scale-in': {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'scale(0.95)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'scale(1)'
+                            }
+                        },
+                        'scale-out': {
+                            '0%': {
+                                opacity: 1,
+                                transform: 'scale(1)'
+                            },
+                            '100%': {
+                                opacity: 0,
+                                transform: 'scale(0.95)'
+                            }
+                        }
+                    }
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities { .content-auto { content-visibility: auto; } .text-shadow { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); } .text-shadow-lg { text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); } .bg-gradient-overlay { background: linear-gradient(to bottom, rgba(0,
+        0, 0, 0.2), rgba(0, 0, 0, 0.7)); } .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; } }
+    </style>
+</head>
+
+<body class="font-inter bg-neutral text-gray-800 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <img src="logo.jpg" alt="海棠春logo" class="h-8 sm:h-10 object-contain">
+                    <span class="text-xl sm:text-2xl font-bold text-white">海棠春</span>
+                </div>
+
+                <!-- 桌面导航 -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="index-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">首页</a>
+                    <a href="script-library-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">剧本库</a>
+                    <a href="session-hall-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">组局大厅</a>
+                    <a href="creator-platform-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">创作者平台</a>
+                    <a href="newbie-guide-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">新手教程</a>
+                    <a href="about-us-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">关于我们</a>
+                </nav>
+
+                <!-- 用户操作区 -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative hidden sm:block">
+                        <input type="text" placeholder="搜索剧本..." id="desktopSearch" class="bg-white/10 backdrop-blur-sm text-white placeholder-white/60 pl-10 pr-4 py-2 rounded-full w-48 lg:w-64 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                    </div>
+                    <button id="loginButton" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full transition-all flex items-center space-x-1">
+                        <i class="fa fa-user-circle"></i>
+                        <span class="hidden sm:inline">登录/注册</span>
+                    </button>
+                    <button id="userProfileButton" class="hidden bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full transition-all flex items-center space-x-1">
+                        <i class="fa fa-user"></i>
+                        <span class="hidden sm:inline" id="currentUsername">用户</span>
+                    </button>
+                    <!-- 移动端菜单按钮 -->
+                    <button id="mobileMenuButton" class="md:hidden text-white text-xl">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 移动端导航菜单 -->
+        <div id="mobileMenu" class="md:hidden bg-secondary/95 backdrop-blur-md absolute w-full left-0 top-full transform -translate-y-full opacity-0 transition-all duration-300 pointer-events-none">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex flex-col space-y-4">
+                    <a href="index-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">首页</a>
+                    <a href="script-library-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">剧本库</a>
+                    <a href="session-hall-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">组局大厅</a>
+                    <a href="creator-platform-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">创作者平台</a>
+                    <a href="newbie-guide-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">新手教程</a>
+                    <a href="about-us-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">关于我们</a>
+                    <div class="relative w-full max-w-md mx-4">
+                        <input type="text" placeholder="搜索剧本..." id="mobileSearch" class="bg-gray-100 text-gray-800 placeholder-gray-500 pl-10 pr-4 py-2 rounded-full w-full focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                    </div>
+                    <button id="mobileUserProfileButton" class="hidden bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full transition-all flex items-center space-x-1 w-full justify-center">
+                        <i class="fa fa-user"></i>
+                        <span id="mobileCurrentUsername">用户</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">用户登录</h3>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-user"></i>
+                            </span>
+                            <input type="text" id="loginUsername" placeholder="请输入用户名" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all hover:border-primary/70">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-lock"></i>
+                            </span>
+                            <input type="password" id="loginPassword" placeholder="请输入密码" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all hover:border-primary/70">
+                        </div>
+                    </div>
+                    <button type="button" id="loginSubmit" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all hover:scale-105">
+                        登录
+                    </button>
+                </form>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p class="text-center text-sm text-gray-600">还没有账号？<a href="#" id="registerLink" class="text-primary hover:underline">立即注册</a></p>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="social-icon bg-[#07C160]/10 hover:bg-[#07C160]/20 text-[#07C160] p-2 rounded-full transition-all hover:scale-110">
+                            <i class="fa fa-weixin text-xl"></i>
+                        </button>
+                        <button class="social-icon bg-[#E6162D]/10 hover:bg-[#E6162D]/20 text-[#E6162D] p-2 rounded-full transition-all hover:scale-110">
+                            <i class="fa fa-weibo text-xl"></i>
+                        </button>
+                        <button class="social-icon bg-[#12B7F5]/10 hover:bg-[#12B7F5]/20 text-[#12B7F5] p-2 rounded-full transition-all hover:scale-110">
+                            <i class="fa fa-qq text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注册模态框 -->
+    <div id="registerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">用户注册</h3>
+                    <button id="closeRegisterModal" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form class="space-y-4">
+                    <div>
+                        <label for="registerUsername" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-user"></i>
+                            </span>
+                            <input type="text" id="registerUsername" placeholder="请输入用户名" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="registerPassword" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-lock"></i>
+                            </span>
+                            <input type="password" id="registerPassword" placeholder="请输入密码" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">确认密码</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-lock"></i>
+                            </span>
+                            <input type="password" id="confirmPassword" placeholder="请再次输入密码" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <button type="button" id="registerSubmit" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all">
+                        注册
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户个人中心模态框 -->
+    <div id="userProfileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">个人中心</h3>
+                    <button id="closeUserProfileModal" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                            <i class="fa fa-user text-3xl text-primary"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold" id="profileUsername">用户名</h4>
+                            <p class="text-gray-500">注册时间: <span id="registrationDate">2025-01-01</span></p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">用户名</span>
+                            <span class="font-medium" id="displayUsername">用户名</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">密码</span>
+                            <div class="flex items-center">
+                                <span id="displayPassword">••••••••</span>
+                                <button id="togglePassword" class="ml-2 text-primary hover:text-primary/80">
+                                    <i class="fa fa-eye-slash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">已玩剧本</span>
+                            <span class="font-medium">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">收藏剧本</span>
+                            <span class="font-medium">0</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-200">
+                        <button id="logoutButton" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-all">
+                            退出登录
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主视觉轮播区 -->
+    <section class="relative h-[70vh] sm:h-[80vh] overflow-hidden">
+        <div class="carousel-slides h-full relative">
+            <div class="carousel-slide absolute inset-0 opacity-0 transition-opacity duration-1000">
+                <div class="absolute inset-0 bg-gradient-overlay"></div>
+                <img src="top1.jpg" alt="沉浸式推理体验" class="w-full h-full object-cover">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center px-4 max-w-4xl mx-auto">
+                        <h1 class="text-[clamp(2rem,5vw,4rem)] font-bold text-white text-shadow-lg mb-4 transform translate-y-8 opacity-0 transition-all duration-700 carousel-text">
+                            沉浸式推理体验</h1>
+                        <p class="text-[clamp(1rem,2vw,1.5rem)] text-white text-shadow mb-8 max-w-2xl mx-auto transform translate-y-8 opacity-0 transition-all duration-700 delay-200 carousel-text">
+                            开启你的第二人生，在剧本杀的世界里体验百态人生</p>
+                        <a href="#" class="bg-primary hover:bg-primary/90 text-white font-medium px-8 py-3 rounded-full text-lg transform translate-y-8 opacity-0 transition-all duration-700 delay-300 carousel-text inline-block">立即体验</a>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-slide absolute inset-0 opacity-0 transition-opacity duration-1000">
+                <div class="absolute inset-0 bg-gradient-overlay"></div>
+                <img src="top2.jpg" alt="热门城限本推荐" class="w-full h-full object-cover">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center px-4 max-w-4xl mx-auto">
+                        <h1 class="text-[clamp(2rem,5vw,4rem)] font-bold text-white text-shadow-lg mb-4 transform translate-y-8 opacity-0 transition-all duration-700 carousel-text">
+                            热门城限本推荐</h1>
+                        <p class="text-[clamp(1rem,2vw,1.5rem)] text-white text-shadow mb-8 max-w-2xl mx-auto transform translate-y-8 opacity-0 transition-all duration-700 delay-200 carousel-text">
+                            独家城市限定剧本，体验不一样的推理乐趣</p>
+                        <a href="#" class="bg-primary hover:bg-primary/90 text-white font-medium px-8 py-3 rounded-full text-lg transform translate-y-8 opacity-0 transition-all duration-700 delay-300 carousel-text inline-block">查看详情</a>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-slide absolute inset-0 opacity-0 transition-opacity duration-1000">
+                <div class="absolute inset-0 bg-gradient-overlay"></div>
+                <img src="top3.jpg" alt="新手入门指南" class="w-full h-full object-cover">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center px-4 max-w-4xl mx-auto">
+                        <h1 class="text-[clamp(2rem,5vw,4rem)] font-bold text-white text-shadow-lg mb-4 transform translate-y-8 opacity-0 transition-all duration-700 carousel-text">
+                            新手入门指南</h1>
+                        <p class="text-[clamp(1rem,2vw,1.5rem)] text-white text-shadow mb-8 max-w-2xl mx-auto transform translate-y-8 opacity-0 transition-all duration-700 delay-200 carousel-text">
+                            第一次玩剧本杀？从这里开始你的推理之旅</p>
+                        <a href="#" class="bg-primary hover:bg-primary/90 text-white font-medium px-8 py-3 rounded-full text-lg transform translate-y-8 opacity-0 transition-all duration-700 delay-300 carousel-text inline-block">新手教程</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 轮播控制按钮 -->
+        <button id="prevSlide" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white w-10 h-10 rounded-full flex items-center justify-center transition-all z-10">
+            <i class="fa fa-angle-left text-xl"></i>
+        </button>
+        <button id="nextSlide" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white w-10 h-10 rounded-full flex items-center justify-center transition-all z-10">
+            <i class="fa fa-angle-right text-xl"></i>
+        </button>
+
+        <!-- 轮播指示器 -->
+        <div class="absolute bottom-6 left-0 right-0 flex justify-center space-x-2 z-10">
+            <button class="carousel-indicator w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all" data-slide="0"></button>
+            <button class="carousel-indicator w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all" data-slide="1"></button>
+            <button class="carousel-indicator w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all" data-slide="2"></button>
+        </div>
+    </section>
+
+    <!-- 快速入口区 -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-center text-gray-800 mb-12">快速开始</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="quick-access-item bg-white rounded-xl p-6 shadow-card hover:shadow-card-hover transition-all transform hover:-translate-y-1">
+                    <div class="quick-access-icon w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 mx-auto">
+                        <span class="text-3xl text-primary">🔍</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-2">智能选本</h3>
+                    <p class="text-gray-600 text-center">根据人数/难度推荐</p>
+                </div>
+                <div class="quick-access-item bg-white rounded-xl p-6 shadow-card hover:shadow-card-hover transition-all transform hover:-translate-y-1">
+                    <div class="quick-access-icon w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 mx-auto">
+                        <span class="text-3xl text-primary">👥</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-2">快速组队</h3>
+                    <p class="text-gray-600 text-center">找到志同道合的队友</p>
+                </div>
+                <div class="quick-access-item bg-white rounded-xl p-6 shadow-card hover:shadow-card-hover transition-all transform hover:-translate-y-1">
+                    <div class="quick-access-icon w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 mx-auto">
+                        <span class="text-3xl text-primary">🏆</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-2">剧本排行榜</h3>
+                    <p class="text-gray-600 text-center">热门剧本一网打尽</p>
+                </div>
+                <div class="quick-access-item bg-white rounded-xl p-6 shadow-card hover:shadow-card-hover transition-all transform hover:-translate-y-1">
+                    <div class="quick-access-icon w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 mx-auto">
+                        <span class="text-3xl text-primary">✍️</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-2">我的剧本库</h3>
+                    <p class="text-gray-600 text-center">管理你的剧本收藏</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-secondary text-white pt-16 pb-8">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <h3 class="text-lg font-bold mb-4">关于我们</h3>
+                    <ul class="space-y-2">
+                        <li><a href="about-us-JYLY.html" class="text-gray-300 hover:text-white transition-colors">公司简介</a></li>
+                        <li><a href="about-us-JYLY.html" class="text-gray-300 hover:text-white transition-colors">团队介绍</a></li>
+                        <li><a href="https://www.qq.com/" class="text-gray-300 hover:text-white transition-colors">联系方式</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">加入我们</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">帮助中心</h3>
+                    <ul class="space-y-2">
+                        <li><a href="newbie-guide-JYLY.html" class="text-gray-300 hover:text-white transition-colors">新手指南</a></li>
+                        <li><a href="https://www.sohu.com/a/64752933_327889" class="text-gray-300 hover:text-white transition-colors">常见问题</a></li>
+                        <li><a href="https://baike.baidu.com/item/%E7%BD%91%E7%BB%9C%E6%B8%B8%E6%88%8F%E9%98%B2%E6%B2%89%E8%BF%B7%E7%B3%BB%E7%BB%9F/6883084#:~:text=2025%E5%B9%B44%E6%9C%88%EF%BC%8C%E8%87%AA%E5%9B%BD%E5%AE%B6%E6%96%B0%E9%97%BB%E5%87%BA%E7%89%88%E7%BD%B2%E4%B8%8B%E5%8F%91%E2%80%9C%E6%9C%80%E4%B8%A5%E9%98%B2%E6%B2%89%E8%BF%B7%E6%96%B0%E8%A7%84%E2%80%9D%E4%BB%A5%E6%9D%A5%EF%BC%8C%E5%B0%BD%E7%AE%A1%E5%A4%9A%E6%95%B0%E7%BD%91%E7%BB%9C%E6%B8%B8%E6%88%8F%E5%B7%B2%E6%8E%A5%E5%85%A5%E9%98%B2%E6%B2%89%E8%BF%B7%E5%AE%9E%E5%90%8D%E8%AE%A4%E8%AF%81%E7%B3%BB%E7%BB%9F%EF%BC%8C%E4%B8%A5%E6%A0%BC%E9%99%90%E5%88%B6%E6%9C%AA%E6%88%90%E5%B9%B4%E4%BA%BA%E6%B8%B8%E6%88%8F%E6%97%B6%E9%97%B4%EF%BC%8C%E4%BD%86%E4%BB%8D%E6%9C%89%E9%83%A8%E5%88%86%E6%B8%B8%E6%88%8F%E5%92%8C%E5%95%86%E5%AE%B6%E8%A7%84%E9%81%BF%E7%9B%91%E7%AE%A1%E3%80%82,%E4%B8%80%E4%BA%9B%E6%B8%B8%E6%88%8F%E6%97%A0%E9%9C%80%E5%AE%9E%E5%90%8D%E8%AE%A4%E8%AF%81%E5%8D%B3%E5%8F%AF%E5%BC%80%E7%8E%A9%EF%BC%8C%E5%A4%9A%E4%B8%BA%E8%8B%B1%E6%96%87%E7%95%8C%E9%9D%A2%E6%88%96%E6%B5%B7%E5%A4%96%E7%89%88%EF%BC%8C%E4%B8%94%E5%90%AB%E6%9C%89%E6%9C%AA%E7%BB%8F%E7%9B%91%E7%AE%A1%E7%9A%84%E5%B9%BF%E5%91%8A%E5%86%85%E5%AE%B9%E3%80%82%20%E5%90%8C%E6%97%B6%EF%BC%8C%E5%9C%A8%E7%94%B5%E5%95%86%E5%92%8C%E4%BA%8C%E6%89%8B%E4%BA%A4%E6%98%93%E5%B9%B3%E5%8F%B0%EF%BC%8C%E5%AD%98%E5%9C%A8%E6%B8%B8%E6%88%8F%E8%B4%A6%E5%8F%B7%E7%A7%9F%E5%94%AE%E6%9C%8D%E5%8A%A1%EF%BC%8C%E6%9C%AA%E6%88%90%E5%B9%B4%E4%BA%BA%E5%8F%AF%E9%80%9A%E8%BF%87%E7%A7%9F%E5%8F%B7%E6%88%96%E4%B9%B0%E5%8F%B7%E7%BB%95%E8%BF%87%E5%AE%9E%E5%90%8D%E8%AE%A4%E8%AF%81%EF%BC%8C%E5%AE%9E%E7%8E%B0%E5%85%A8%E6%97%B6%E6%AE%B5%E6%97%A0%E9%99%90%E7%95%85%E7%8E%A9%E5%8F%8A%E5%85%85%E5%80%BC%E6%B6%88%E8%B4%B9%E3%80%82"
+                                class="text-gray-300 hover:text-white transition-colors">防沉迷说明</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">用户协议</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">商务合作</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">门店加盟</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">剧本投稿</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">广告合作</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">品牌合作</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">关注我们</h3>
+                    <p class="text-gray-300 mb-4">获取最新剧本资讯和活动信息</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="social-icon w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all">
+                            <i class="fa fa-weixin text-xl"></i>
+                        </a>
+                        <a href="#" class="social-icon w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all">
+                            <i class="fa fa-weibo text-xl"></i>
+                        </a>
+                        <a href="#" class="social-icon w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all">
+                            <i class="fa fa-qq text-xl"></i>
+                        </a>
+                        <a href="#" class="social-icon w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all">
+                            <i class="fa fa-douyin text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8">
+                <p class="text-center text-gray-400 text-sm">© 2025 海棠春 版权所有 | 浙ICP备12345678号-1</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 导航栏滚动效果
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-secondary/95', 'backdrop-blur-md', 'shadow-md');
+                navbar.classList.remove('bg-transparent');
+            } else {
+                navbar.classList.remove('bg-secondary/95', 'backdrop-blur-md', 'shadow-md');
+                navbar.classList.add('bg-transparent');
+            }
+        });
+
+        // 移动端菜单
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            if (mobileMenu.classList.contains('opacity-0')) {
+                mobileMenu.classList.remove('opacity-0', '-translate-y-full', 'pointer-events-none');
+                mobileMenu.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenuButton.innerHTML = '<i class="fa fa-times"></i>';
+            } else {
+                mobileMenu.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenuButton.innerHTML = '<i class="fa fa-bars"></i>';
+            }
+        });
+
+        // 登录模态框
+        const loginButton = document.getElementById('loginButton');
+        const loginModal = document.getElementById('loginModal');
+        const closeModal = document.getElementById('closeModal');
+        const registerLink = document.getElementById('registerLink');
+
+        loginButton.addEventListener('click', () => {
+            loginModal.classList.remove('opacity-0', 'pointer-events-none');
+            loginModal.classList.add('animate-fade-in-down');
+            loginModal.querySelector('div').classList.remove('scale-95');
+            loginModal.querySelector('div').classList.add('scale-100', 'animate-scale-in');
+        });
+
+        closeModal.addEventListener('click', () => {
+            loginModal.classList.add('opacity-0', 'pointer-events-none', 'animate-fade-out-up');
+            loginModal.querySelector('div').classList.add('scale-95', 'animate-scale-out');
+            loginModal.querySelector('div').classList.remove('scale-100');
+        });
+
+        // 点击模态框外部关闭
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.classList.add('opacity-0', 'pointer-events-none', 'animate-fade-out-up');
+                loginModal.querySelector('div').classList.add('scale-95', 'animate-scale-out');
+                loginModal.querySelector('div').classList.remove('scale-100');
+            }
+        });
+
+        // 注册模态框
+        const registerModal = document.getElementById('registerModal');
+        const closeRegisterModal = document.getElementById('closeRegisterModal');
+
+        registerLink.addEventListener('click', () => {
+            loginModal.classList.add('opacity-0', 'pointer-events-none', 'animate-fade-out-up');
+            loginModal.querySelector('div').classList.add('scale-95', 'animate-scale-out');
+            loginModal.querySelector('div').classList.remove('scale-100');
+            registerModal.classList.remove('opacity-0', 'pointer-events-none');
+            registerModal.classList.add('animate-fade-in-down');
+            registerModal.querySelector('div').classList.remove('scale-95');
+            registerModal.querySelector('div').classList.add('scale-100', 'animate-scale-in');
+        });
+
+        closeRegisterModal.addEventListener('click', () => {
+            registerModal.classList.add('opacity-0', 'pointer-events-none', 'animate-fade-out-up');
+            registerModal.querySelector('div').classList.add('scale-95', 'animate-scale-out');
+            registerModal.querySelector('div').classList.remove('scale-100');
+        });
+
+        // 点击模态框外部关闭
+        registerModal.addEventListener('click', (e) => {
+            if (e.target === registerModal) {
+                registerModal.classList.add('opacity-0', 'pointer-events-none', 'animate-fade-out-up');
+                registerModal.querySelector('div').classList.add('scale-95', 'animate-scale-out');
+                registerModal.querySelector('div').classList.remove('scale-100');
+            }
+        });
+
+        // 轮播图
+        const carouselSlides = document.querySelectorAll('.carousel-slide');
+        const carouselIndicators = document.querySelectorAll('.carousel-indicator');
+        const prevSlide = document.getElementById('prevSlide');
+        const nextSlide = document.getElementById('nextSlide');
+        let currentSlide = 0;
+
+        function showSlide(index) {
+            // 隐藏所有幻灯片
+            carouselSlides.forEach(slide => {
+                slide.classList.add('opacity-0');
+                slide.classList.remove('opacity-100');
+            });
+
+            // 重置所有指示器
+            carouselIndicators.forEach(indicator => {
+                indicator.classList.remove('bg-white');
+                indicator.classList.add('bg-white/50');
+            });
+
+            // 显示当前幻灯片
+            carouselSlides[index].classList.remove('opacity-0');
+            carouselSlides[index].classList.add('opacity-100');
+
+            // 激活当前指示器
+            carouselIndicators[index].classList.remove('bg-white/50');
+            carouselIndicators[index].classList.add('bg-white');
+
+            // 动画文本
+            const carouselTexts = carouselSlides[index].querySelectorAll('.carousel-text');
+            carouselTexts.forEach(text => {
+                text.classList.remove('translate-y-8', 'opacity-0');
+                text.classList.add('translate-y-0', 'opacity-100');
+            });
+        }
+
+        prevSlide.addEventListener('click', () => {
+            currentSlide = (currentSlide - 1 + carouselSlides.length) % carouselSlides.length;
+            showSlide(currentSlide);
+        });
+
+        nextSlide.addEventListener('click', () => {
+            currentSlide = (currentSlide + 1) % carouselSlides.length;
+            showSlide(currentSlide);
+        });
+
+        carouselIndicators.forEach(indicator => {
+            indicator.addEventListener('click', () => {
+                const slideIndex = parseInt(indicator.dataset.slide);
+                showSlide(slideIndex);
+            });
+        });
+
+        // 自动轮播
+        setInterval(() => {
+            currentSlide = (currentSlide + 1) % carouselSlides.length;
+            showSlide(currentSlide);
+        }, 5000);
+    </script>
+</body>
+
+</html>

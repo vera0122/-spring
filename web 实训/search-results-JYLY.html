@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索结果 - 海棠春剧本杀</title>
+    <!-- 引入Tailwind CSS和其他资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- 配置Tailwind主题 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E94560',
+                        secondary: '#1A1A2E',
+                        tertiary: '#16213E',
+                        neutral: '#F5F5F5',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        window.addEventListener('load', () => {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const loginButton = document.getElementById('loginButton');
+            const userProfileButton = document.getElementById('userProfileButton');
+            const mobileUserProfileButton = document.getElementById('mobileUserProfileButton');
+
+            if (loggedInUser) {
+                loginButton.style.display = 'none';
+                userProfileButton.style.display = 'flex';
+                mobileUserProfileButton.style.display = 'flex';
+                const currentUsernameElements = document.querySelectorAll('#currentUsername, #mobileCurrentUsername, #profileUsername, #displayUsername');
+                currentUsernameElements.forEach(element => {
+                    element.textContent = loggedInUser;
+                });
+
+                // 查找用户并显示密码
+                const user = users.find(user => user.username === loggedInUser);
+                if (user) {
+                    document.getElementById('displayPassword').textContent = user.password;
+                }
+            } else {
+                loginButton.style.display = 'flex';
+                userProfileButton.style.display = 'none';
+                mobileUserProfileButton.style.display = 'none';
+            }
+        });
+    </script>
+</head>
+
+<body class="font-inter bg-neutral">
+    <!-- 导航栏 -->
+    <header class="bg-secondary text-white shadow-md">
+        <!-- 导航栏内容 -->
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 py-8">
+        <section class="mb-8">
+            <h1 class="text-2xl font-bold mb-4">搜索结果</h1>
+            <p class="text-gray-600 mb-6">搜索关键词: <span id="searchQuery" class="font-medium text-primary"></span></p>
+
+            <div id="searchResults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 搜索结果将在这里动态显示 -->
+            </div>
+
+            <div id="noResults" class="hidden text-center py-12">
+                <i class="fa fa-search text-4xl text-gray-400 mb-4"></i>
+                <p class="text-xl text-gray-600">未找到相关剧本</p>
+                <p class="text-gray-500 mt-2">请尝试使用其他关键词或调整搜索条件</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-secondary text-white py-8">
+        <!-- 页脚内容 -->
+    </footer>
+
+    <script>
+        // 获取URL中的搜索参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchTerm = urlParams.get('query') || '';
+
+        // 显示搜索关键词
+        document.getElementById('searchQuery').textContent = searchTerm;
+
+        // 模拟搜索数据（实际项目中应从API获取）
+        const mockScripts = [{
+            id: 1,
+            title: "血色玫瑰庄园",
+            type: "悬疑推理",
+            cover: "https://picsum.photos/id/237/300/400",
+            rating: 4.8
+        }, {
+            id: 2,
+            title: "江湖恩怨",
+            type: "古风情感",
+            cover: "https://picsum.photos/id/239/300/400",
+            rating: 4.6
+        }, {
+            id: 3,
+            title: "末日列车",
+            type: "科幻机制",
+            cover: "https://picsum.photos/id/240/300/400",
+            rating: 4.7
+        }, {
+            id: 4,
+            title: "青楼风云",
+            type: "欢乐阵营",
+            cover: "https://picsum.photos/id/241/300/400",
+            rating: 4.5
+        }, {
+            id: 5,
+            title: "死亡通知书",
+            type: "硬核推理",
+            cover: "https://picsum.photos/id/242/300/400",
+            rating: 4.9
+        }, {
+            id: 6,
+            title: "星途璀璨",
+            type: "现代情感",
+            cover: "https://picsum.photos/id/243/300/400",
+            rating: 4.4
+        }];
+
+        // 过滤搜索结果
+        const filteredResults = mockScripts.filter(script =>
+            script.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            script.type.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        // 显示搜索结果
+        const resultsContainer = document.getElementById('searchResults');
+        const noResultsContainer = document.getElementById('noResults');
+
+        if (filteredResults.length > 0) {
+            filteredResults.forEach(script => {
+                const resultCard = document.createElement('div');
+                resultCard.className = 'bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300';
+                resultCard.innerHTML = `
+                    <img src="${script.cover}" alt="${script.title}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-semibold text-lg">${script.title}</h3>
+                            <span class="bg-primary/10 text-primary px-2 py-1 rounded text-sm">${script.type}</span>
+                        </div>
+                        <div class="flex items-center text-yellow-400 mb-3">
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star-half-o"></i>
+                            <span class="ml-1 text-gray-600">${script.rating}</span>
+                        </div>
+                        <button class="w-full bg-primary hover:bg-primary/90 text-white py-2 rounded transition-colors duration-300">
+                            查看详情
+                        </button>
+                    </div>
+                `;
+                resultsContainer.appendChild(resultCard);
+            });
+        } else {
+            resultsContainer.classList.add('hidden');
+            noResultsContainer.classList.remove('hidden');
+        }
+    </script>
+</body>
+
+</html>

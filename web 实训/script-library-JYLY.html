@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>海棠春 - 剧本库</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E94560', // 主色调：红色，代表悬疑和激情
+                        secondary: '#1A1A2E', // 辅助色：深蓝，代表神秘感
+                        tertiary: '#16213E', // 第三色：暗蓝，代表沉浸感
+                        accent: '#FFC107', // 强调色：金色，代表重要元素
+                        neutral: '#F5F5F5', // 中性色：浅灰，用于背景
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    }
+                },
+            }
+        }
+    </script>
+    <script>
+        window.addEventListener('load', () => {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const loginButton = document.getElementById('loginButton');
+            const userProfileButton = document.getElementById('userProfileButton');
+            const mobileUserProfileButton = document.getElementById('mobileUserProfileButton');
+
+            if (loggedInUser) {
+                loginButton.style.display = 'none';
+                userProfileButton.style.display = 'flex';
+                mobileUserProfileButton.style.display = 'flex';
+                const currentUsernameElements = document.querySelectorAll('#currentUsername, #mobileCurrentUsername, #profileUsername, #displayUsername');
+                currentUsernameElements.forEach(element => {
+                    element.textContent = loggedInUser;
+                });
+
+                // 查找用户并显示密码
+                const user = users.find(user => user.username === loggedInUser);
+                if (user) {
+                    document.getElementById('displayPassword').textContent = user.password;
+                }
+            } else {
+                loginButton.style.display = 'flex';
+                userProfileButton.style.display = 'none';
+                mobileUserProfileButton.style.display = 'none';
+            }
+        });
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities { .content-auto { content-visibility: auto; } .text-shadow { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); } .text-shadow-lg { text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); } .bg-gradient-overlay { background: linear-gradient(to bottom, rgba(0,
+        0, 0, 0.2), rgba(0, 0, 0, 0.7)); } .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; } .card-hover-effect { transition: all 0.3s ease; } .card-hover-effect:hover { transform:
+        translateY(-8px); } .scale-on-hover { transition: transform 0.5s ease; } .scale-on-hover:hover { transform: scale(1.05); } .fade-in { animation: fadeIn 0.5s ease-in-out; } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const loginButton = document.getElementById('loginButton');
+            const loginModal = document.getElementById('loginModal');
+            const closeModal = document.getElementById('closeModal');
+            const navbar = document.getElementById('navbar');
+            const viewButtons = document.querySelectorAll('.view-button');
+            const scriptCards = document.querySelectorAll('.script-card');
+            const filterButtons = document.querySelectorAll('.filter-button');
+            const filterTags = document.querySelectorAll('.filter-tag');
+            const scriptDetailModal = document.getElementById('scriptDetailModal');
+            const closeScriptDetailModal = document.getElementById('closeScriptDetailModal');
+
+            // 移动端菜单切换
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('-translate-y-full');
+                mobileMenu.classList.toggle('opacity-0');
+                mobileMenu.classList.toggle('pointer-events-none');
+            });
+
+            // 登录模态框控制
+            loginButton.addEventListener('click', function() {
+                loginModal.classList.remove('opacity-0');
+                loginModal.classList.remove('pointer-events-none');
+            });
+
+            closeModal.addEventListener('click', function() {
+                loginModal.classList.add('opacity-0');
+                loginModal.classList.add('pointer-events-none');
+            });
+
+            // 点击模态框外部关闭
+            loginModal.addEventListener('click', function(e) {
+                if (e.target === loginModal) {
+                    loginModal.classList.add('opacity-0');
+                    loginModal.classList.add('pointer-events-none');
+                }
+            });
+
+            // 导航栏滚动效果
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-secondary/95', 'backdrop-blur-md', 'shadow-md');
+                } else {
+                    navbar.classList.remove('bg-secondary/95', 'backdrop-blur-md', 'shadow-md');
+                }
+            });
+
+            // 视图切换功能
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    viewButtons.forEach(btn => {
+                        btn.classList.remove('bg-primary', 'text-white');
+                        btn.classList.add('bg-gray-100', 'text-gray-500');
+                    });
+                    this.classList.remove('bg-gray-100', 'text-gray-500');
+                    this.classList.add('bg-primary', 'text-white');
+
+                    // 切换视图布局（网格/列表）
+                    if (this.querySelector('i').classList.contains('fa-list')) {
+                        scriptCards.forEach(card => {
+                            card.classList.remove('lg:col-span-1');
+                            card.classList.add('lg:col-span-3');
+
+                            // 调整卡片内部布局为列表视图
+                            const cardContent = card.querySelector('.script-info');
+                            cardContent.classList.add('flex', 'flex-col', 'lg:flex-row', 'lg:items-center');
+
+                            const cardDesc = card.querySelector('.script-desc');
+                            cardDesc.classList.remove('line-clamp-3');
+                            cardDesc.classList.add('lg:line-clamp-2');
+                        });
+                    } else {
+                        scriptCards.forEach(card => {
+                            card.classList.remove('lg:col-span-3');
+                            card.classList.add('lg:col-span-1');
+
+                            // 恢复卡片内部布局为网格视图
+                            const cardContent = card.querySelector('.script-info');
+                            cardContent.classList.remove('flex', 'flex-col', 'lg:flex-row', 'lg:items-center');
+
+                            const cardDesc = card.querySelector('.script-desc');
+                            cardDesc.classList.remove('lg:line-clamp-2');
+                            cardDesc.classList.add('line-clamp-3');
+                        });
+                    }
+                });
+            });
+
+            // 筛选按钮效果
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 模拟筛选加载效果
+                    scriptCards.forEach(card => {
+                        card.style.opacity = '0.5';
+                        card.style.pointerEvents = 'none';
+                    });
+
+                    setTimeout(() => {
+                        scriptCards.forEach(card => {
+                            card.style.opacity = '1';
+                            card.style.pointerEvents = 'auto';
+                        });
+                    }, 500);
+                });
+            });
+
+            // 难度标签切换效果
+            filterTags.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    filterTags.forEach(t => {
+                        t.classList.remove('bg-primary', 'text-white');
+                        t.classList.add('bg-gray-100', 'hover:bg-gray-200');
+                    });
+                    this.classList.remove('bg-gray-100', 'hover:bg-gray-200');
+                    this.classList.add('bg-primary', 'text-white');
+                });
+            });
+
+            // 添加卡片悬停动画
+            scriptCards.forEach(card => {
+                card.classList.add('card-hover-effect');
+                const cardImage = card.querySelector('.script-image img');
+                cardImage.classList.add('scale-on-hover');
+
+                // 为图片添加点击事件监听器
+                cardImage.addEventListener('click', function() {
+                    const scriptTitle = card.querySelector('.script-title').textContent;
+                    const scriptMeta = card.querySelector('.script-meta').innerHTML;
+                    const scriptDesc = card.querySelector('.script-desc').textContent;
+                    const scriptDifficulty = card.querySelector('.script-info div:first-child div:last-child').innerHTML;
+                    const scriptPeople = card.querySelector('.script-info div:last-child div:last-child').textContent;
+
+                    document.getElementById('scriptDetailTitle').textContent = scriptTitle;
+                    document.getElementById('scriptDetailMeta').innerHTML = scriptMeta;
+                    document.getElementById('scriptDetailDesc').textContent = scriptDesc;
+                    document.getElementById('scriptDetailDifficulty').innerHTML = scriptDifficulty;
+                    document.getElementById('scriptDetailPeople').textContent = scriptPeople;
+
+                    scriptDetailModal.classList.remove('opacity-0');
+                    scriptDetailModal.classList.remove('pointer-events-none');
+                });
+            });
+
+            // 平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // 关闭剧本详情模态框
+            closeScriptDetailModal.addEventListener('click', function() {
+                scriptDetailModal.classList.add('opacity-0');
+                scriptDetailModal.classList.add('pointer-events-none');
+            });
+
+            // 点击模态框外部关闭
+            scriptDetailModal.addEventListener('click', function(e) {
+                if (e.target === scriptDetailModal) {
+                    scriptDetailModal.classList.add('opacity-0');
+                    scriptDetailModal.classList.add('pointer-events-none');
+                }
+            });
+        });
+    </script>
+</head>
+
+<body class="font-inter bg-neutral text-gray-800 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <img src="logo.jpg" alt="海棠春logo" class="h-8 sm:h-10 object-contain">
+                    <span class="text-xl sm:text-2xl font-bold text-white">海棠春</span>
+                </div>
+
+                <!-- 桌面导航 -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="index-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">首页</a>
+                    <a href="script-library-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">剧本库</a>
+                    <a href="session-hall-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">组局大厅</a>
+                    <a href="creator-platform-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">创作者平台</a>
+                    <a href="newbie-guide-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">新手教程</a>
+                    <a href="about-us-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">关于我们</a>
+                </nav>
+
+                <!-- 用户操作区 -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative hidden sm:block">
+                        <input type="text" placeholder="搜索剧本..." class="bg-white/10 backdrop-blur-sm text-white placeholder-white/60 pl-10 pr-4 py-2 rounded-full w-48 lg:w-64 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                    </div>
+                    <button id="loginButton" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full transition-all flex items-center space-x-1">
+                        <i class="fa fa-user-circle"></i>
+                        <span class="hidden sm:inline">登录/注册</span>
+                    </button>
+                    <!-- 移动端菜单按钮 -->
+                    <button id="mobileMenuButton" class="md:hidden text-white text-xl">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 移动端导航菜单 -->
+        <div id="mobileMenu" class="md:hidden bg-secondary/95 backdrop-blur-md absolute w-full left-0 top-full transform -translate-y-full opacity-0 transition-all duration-300 pointer-events-none">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex flex-col space-y-4">
+                    <a href="index-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">首页</a>
+                    <a href="script-library-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">剧本库</a>
+                    <a href="session-hall-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">组局大厅</a>
+                    <a href="creator-platform-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">创作者平台</a>
+                    <a href="newbie-guide-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">新手教程</a>
+                    <a href="about-us-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">关于我们</a>
+                    <div class="relative mt-2">
+                        <input type="text" placeholder="搜索剧本..." class="bg-white/10 backdrop-blur-sm text-white placeholder-white/60 pl-10 pr-4 py-2 rounded-full w-full focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">用户登录</h3>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-user"></i>
+                            </span>
+                            <input type="text" id="username" placeholder="请输入用户名" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-lock"></i>
+                            </span>
+                            <input type="password" id="password" placeholder="请输入密码" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <button type="button" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all">登录</button>
+                </form>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p class="text-center text-sm text-gray-600">还没有账号？<a href="#" class="text-primary hover:underline">立即注册</a></p>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="social-icon bg-[#07C160]/10 hover:bg-[#07C160]/20 text-[#07C160] p-2 rounded-full transition-all">
+                            <i class="fa fa-weixin text-xl"></i>
+                        </button>
+                        <button class="social-icon bg-[#E6162D]/10 hover:bg-[#E6162D]/20 text-[#E6162D] p-2 rounded-full transition-all">
+                            <i class="fa fa-weibo text-xl"></i>
+                        </button>
+                        <button class="social-icon bg-[#12B7F5]/10 hover:bg-[#12B7F5]/20 text-[#12B7F5] p-2 rounded-full transition-all">
+                            <i class="fa fa-qq text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面头部 -->
+    <section class="relative h-60 bg-secondary overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-tertiary to-secondary opacity-90"></div>
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 h-full flex items-center">
+            <div>
+                <h1 class="text-[clamp(1.8rem,4vw,3rem)] font-bold text-white text-shadow-lg mb-2">剧本库</h1>
+                <p class="text-white/80 text-lg max-w-2xl">探索超过1000+精选剧本，找到适合你的沉浸式推理体验</p>
+            </div>
+        </div>
+        <!-- 装饰元素 -->
+        <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-neutral to-transparent"></div>
+    </section>
+
+    <!-- 面包屑导航 -->
+    <section class="py-4 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center text-sm text-gray-500">
+                <a href="index-JYLY.html" class="hover:text-primary transition-colors">首页</a>
+                <i class="fa fa-angle-right mx-2 text-gray-400"></i>
+                <span class="text-gray-700">剧本库</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 热门推荐轮播 -->
+    <section class="py-8 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">热门推荐</h2>
+                <div class="flex space-x-2">
+                    <button class="carousel-control w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all">
+                        <i class="fa fa-angle-left"></i>
+                    </button>
+                    <button class="carousel-control w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all">
+                        <i class="fa fa-angle-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="relative overflow-hidden">
+                <div class="carousel-track flex transition-transform duration-500" style="transform: translateX(0);">
+                    <!-- 推荐剧本卡片 1 -->
+                    <div class="carousel-item min-w-full sm:min-w-[50%] lg:min-w-[33.333%] p-2">
+                        <div class="bg-white rounded-xl overflow-hidden shadow-lg h-full">
+                            <div class="h-64 overflow-hidden">
+                                <img src="https://picsum.photos/id/237/800/500" alt="病娇男孩的精分日记" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="text-xl font-bold">病娇男孩的精分日记</h3>
+                                    <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">热门</span>
+                                </div>
+                                <div class="flex items-center space-x-2 mb-3">
+                                    <span class="text-sm bg-gray-100 px-3 py-1 rounded-full">硬核推理</span>
+                                    <div class="flex items-center">
+                                        <i class="fa fa-star text-yellow-400"></i>
+                                        <span class="ml-1 text-sm">4.8</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-4">七个人格共用一个身体，当你们发现彼此的存在，一场精心设计的谋杀即将上演...</p>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm text-gray-500">难度：</span>
+                                        <div class="flex">
+                                            <i class="fa fa-circle text-primary text-xs"></i>
+                                            <i class="fa fa-circle text-primary text-xs"></i>
+                                            <i class="fa fa-circle text-primary text-xs"></i>
+                                            <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                            <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm text-gray-500">人数：</span>
+                                        <span>7人</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 推荐剧本卡片 2 -->
+                    <div class="carousel-item min-w-full sm:min-w-[50%] lg:min-w-[33.333%] p-2">
+                        <div class="bg-white rounded-xl overflow-hidden shadow-lg h-full">
+                            <div class="h-64 overflow-hidden">
+                                <img src="https://picsum.photos/id/239/800/500" alt="年轮" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="text-xl font-bold">年轮</h3>
+                                    <span class="bg-tertiary/10 text-tertiary text-xs px-2 py-1 rounded-full">高分</span>
+                                </div>
+                                <div class="flex items-center space-x-2 mb-3">
+                                    <span class="text-sm bg-gray-100 px-3 py-1 rounded-full">硬核推理</span>
+                                    <div class="flex items-center">
+                                        <i class="fa fa-star text-yellow-400"></i>
+                                        <span class="ml-1 text-sm">4.9</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-4">位于T市郊外160多公里一座山谷内的废墟，原先是一个仅有数十户人口的小村。一天夜里突发大火...</p>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm text-gray-500">难度：</span>
+                                        <div class="flex">
+                                            <i class="fa fa-circle text-primary text-xs"></i>
+                                            <i class="fa fa-circle text-primary text-xs"></i>
+                                            <i class="fa fa-circle text-primary text-xs"></i>
+                                            <i class="fa fa-circle text-primary text-xs"></i>
+                                            <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm text-gray-500">人数：</span>
+                                        <span>5人</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 推荐剧本卡片 3 -->
+                    <div class="carousel-item min-w-full sm:min-w-[50%] lg:min-w-[33.333%] p-2">
+                        <div class="bg-white rounded-xl overflow-hidden shadow-lg h-full">
+                            <div class="h-64 overflow-hidden">
+                                <img src="https://picsum.photos/id/240/800/500" alt="你好" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="text-xl font-bold">你好</h3>
+                                    <span class="bg-accent/10 text-accent text-xs px-2 py-1 rounded-full">情感</span>
+                                </div>
+                                <div class="flex items-center space-x-2 mb-3">
+                                    <span class="text-sm bg-gray-100 px-3 py-1 rounded-full">情感沉浸</span>
+                                    <div class="flex items-center">
+                                        <i class="fa fa-star text-yellow-400"></i>
+                                        <span class="ml-1 text-sm">4.7</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-4">人生若只如初见，该多好。那一日，重逢相遇，他目光炯炯，她满目星河...</p>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm text-gray-500">难度：</span>
+                                        <div class="flex">
+                                            <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                            <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                            <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                            <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                            <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm text-gray-500">人数：</span>
+                                        <span>6人</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 剧本筛选区 -->
+    <section class="py-8 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gray-50 rounded-xl shadow-sm p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">剧本类型</label>
+                        <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                            <option value="">全部类型</option>
+                            <option value="hardcore">硬核推理</option>
+                            <option value="emotional">情感沉浸</option>
+                            <option value="happy">欢乐机制</option>
+                            <option value="horror">恐怖惊悚</option>
+                            <option value="other">其他类型</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">玩家人数</label>
+                        <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                            <option value="">全部人数</option>
+                            <option value="4">4人</option>
+                            <option value="5">5人</option>
+                            <option value="6">6人</option>
+                            <option value="7">7人</option>
+                            <option value="8">8人</option>
+                            <option value="9+">9人以上</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">游戏时长</label>
+                        <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                            <option value="">全部时长</option>
+                            <option value="2">2小时以内</option>
+                            <option value="4">3 - 4小时</option>
+                            <option value="5">5小时以上</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">难度级别</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="filter-tag px-4 py-2 bg-primary text-white rounded-full transition-all">全部</button>
+                            <button class="filter-tag px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all">新手</button>
+                            <button class="filter-tag px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all">进阶</button>
+                            <button class="filter-tag px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all">烧脑</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">价格区间</label>
+                        <input type="range" min="0" max="200" value="100" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>0元</span>
+                            <span>100元</span>
+                            <span>200元</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap justify-end gap-3 mt-6">
+                    <button class="filter-button px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all">重置条件</button>
+                    <button class="filter-button px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all">筛选剧本</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 排序和视图切换 -->
+    <section class="py-6 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-500">找到 <span class="font-medium text-gray-800">248</span> 个剧本</span>
+                    <div class="relative">
+                        <select class="pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm">
+                            <option value="recommend">推荐排序</option>
+                            <option value="rating">评分优先</option>
+                            <option value="newest">最新上线</option>
+                            <option value="popular">热门程度</option>
+                            <option value="price-asc">价格从低到高</option>
+                            <option value="price-desc">价格从高到低</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button class="view-button p-2 bg-primary text-white rounded-lg transition-all">
+                        <i class="fa fa-th-large"></i>
+                    </button>
+                    <button class="view-button p-2 bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-lg transition-all">
+                        <i class="fa fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 剧本列表 -->
+    <section class="py-8 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 剧本卡片 1 -->
+                <div class="script-card bg-white rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all transform hover:-translate-y-1">
+                    <div class="script-image h-48 overflow-hidden relative">
+                        <img src="https://picsum.photos/id/237/600/400" alt="病娇男孩的精分日记" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                        <div class="absolute top-3 left-3 bg-primary text-white text-xs px-2 py-1 rounded">热门</div>
+                    </div>
+                    <div class="script-info p-6">
+                        <h3 class="script-title text-xl font-bold mb-2">病娇男孩的精分日记</h3>
+                        <div class="script-meta flex items-center justify-between mb-3">
+                            <span class="text-sm bg-gray-100 px-3 py-1 rounded-full">硬核推理</span>
+                            <div class="flex items-center">
+                                <i class="fa fa-star text-yellow-400"></i>
+                                <span class="ml-1">4.8</span>
+                            </div>
+                        </div>
+                        <p class="script-desc text-gray-600 text-sm mb-4 line-clamp-3">七个人格共用一个身体，当你们发现彼此的存在，一场精心设计的谋杀即将上演...</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">难度：</span>
+                                <div class="flex">
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">人数：</span>
+                                <span>7人</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 剧本卡片 2 -->
+                <div class="script-card bg-white rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all transform hover:-translate-y-1">
+                    <div class="script-image h-48 overflow-hidden relative">
+                        <img src="https://picsum.photos/id/238/600/400" alt="年轮" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                        <div class="absolute top-3 left-3 bg-tertiary text-white text-xs px-2 py-1 rounded">高分</div>
+                    </div>
+                    <div class="script-info p-6">
+                        <h3 class="script-title text-xl font-bold mb-2">年轮</h3>
+                        <div class="script-meta flex items-center justify-between mb-3">
+                            <span class="text-sm bg-gray-100 px-3 py-1 rounded-full">硬核推理</span>
+                            <div class="flex items-center">
+                                <i class="fa fa-star text-yellow-400"></i>
+                                <span class="ml-1">4.9</span>
+                            </div>
+                        </div>
+                        <p class="script-desc text-gray-600 text-sm mb-4 line-clamp-3">位于T市郊外160多公里一座山谷内的废墟，原先是一个仅有数十户人口的小村。一天夜里突发大火，直到天亮才被扑灭。当人们走进废墟时，发现了一片死状诡异的焦尸...</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">难度：</span>
+                                <div class="flex">
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">人数：</span>
+                                <span>5人</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 剧本卡片 3 -->
+                <div class="script-card bg-white rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all transform hover:-translate-y-1">
+                    <div class="script-image h-48 overflow-hidden relative">
+                        <img src="https://picsum.photos/id/240/600/400" alt="你好" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                        <div class="absolute top-3 left-3 bg-accent text-white text-xs px-2 py-1 rounded">情感</div>
+                    </div>
+                    <div class="script-info p-6">
+                        <h3 class="script-title text-xl font-bold mb-2">你好</h3>
+                        <div class="script-meta flex items-center justify-between mb-3">
+                            <span class="text-sm bg-gray-100 px-3 py-1 rounded-full">情感沉浸</span>
+                            <div class="flex items-center">
+                                <i class="fa fa-star text-yellow-400"></i>
+                                <span class="ml-1">4.7</span>
+                            </div>
+                        </div>
+                        <p class="script-desc text-gray-600 text-sm mb-4 line-clamp-3">人生若只如初见，该多好。那一日，重逢相遇，他目光炯炯，她满目星河。那一日，相知相识，他轻声问候，她莞尔一笑。可人生，怎会只如初见。你好，还记得初见的那个下午吗？你好，还记得那些一起走过的日子吗？你好，还会记得我吗？你好，再见...</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">难度：</span>
+                                <div class="flex">
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">人数：</span>
+                                <span>6人</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 剧本卡片 4 -->
+                <div class="script-card bg-white rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all transform hover:-translate-y-1">
+                    <div class="script-image h-48 overflow-hidden relative">
+                        <img src="https://picsum.photos/id/241/600/400" alt="青楼" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                        <div class="absolute top-3 left-3 bg-primary text-white text-xs px-2 py-1 rounded">热门</div>
+                    </div>
+                    <div class="script-info p-6">
+                        <h3 class="script-title text-xl font-bold mb-2">青楼</h3>
+                        <div class="script-meta flex items-center justify-between mb-3">
+                            <span class="text-sm bg-gray-100 px-3 py-1 rounded-full">欢乐机制</span>
+                            <div class="flex items-center">
+                                <i class="fa fa-star text-yellow-400"></i>
+                                <span class="ml-1">4.6</span>
+                            </div>
+                        </div>
+                        <p class="script-desc text-gray-600 text-sm mb-4 line-clamp-3">长安有一间名叫玉满楼的青楼，是无数达官贵人的聚集地，里面的姑娘各个琴棋书画样样精通。就在最近，那青楼里来了个神秘的公子，身价不菲却不知来路。这天，玉满楼里来了几位贵客，一场好戏即将上演...</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">难度：</span>
+                                <div class="flex">
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">人数：</span>
+                                <span>7人</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 剧本卡片 5 -->
+                <div class="script-card bg-white rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all transform hover:-translate-y-1">
+                    <div class="script-image h-48 overflow-hidden relative">
+                        <img src="https://picsum.photos/id/242/600/400" alt="第二十二条校规" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                        <div class="absolute top-3 left-3 bg-red-600 text-white text-xs px-2 py-1 rounded">恐怖</div>
+                    </div>
+                    <div class="script-info p-6">
+                        <h3 class="script-title text-xl font-bold mb-2">第二十二条校规</h3>
+                        <div class="script-meta flex items-center justify-between mb-3">
+                            <span class="text-sm bg-gray-100 px-3 py-1 rounded-full">恐怖惊悚</span>
+                            <div class="flex items-center">
+                                <i class="fa fa-star text-yellow-400"></i>
+                                <span class="ml-1">4.8</span>
+                            </div>
+                        </div>
+                        <p class="script-desc text-gray-600 text-sm mb-4 line-clamp-3">现在是深夜凌晨2:00，往日人声鼎沸的学校里此刻充满寂静，阴冷的月光照在一一个个无人的教室中，给黑夜平添上了一分诡异感。教学楼一共有6层，此时5楼某个教室中，一个人影悄悄的打开了教室的门，然后小心翼翼的观察着周围的走廊，良久，这个人影似乎松了口气，轻轻的走出去并关上教室的门似是在极力避免发出声音，突然，“他”浑身一抖，似乎感应到了什么一样，立刻朝着走廊的一边狂奔，看到楼梯后“他”飞速向下跑，正想一口气冲下一楼时，“他”突然在楼梯口停了下来，接着头也不回的转身朝二楼跑去，似乎楼梯下面有什么非常恐怖的东西在等着“他”一样，终于“他”累了跑不动了，“他”在走廊尽头找到了一间教室便赶忙冲了进去想要躲一躲，但是打开门的瞬间，“他”的脸色瞬间变得惨白，眼睛直勾勾的看着眼前难以置信的一幕，随后，死寂的校园中传出了一声凄厉的惨叫...</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">难度：</span>
+                                <div class="flex">
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">人数：</span>
+                                <span>7人</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 剧本卡片 6 -->
+                <div class="script-card bg-white rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all transform hover:-translate-y-1">
+                    <div class="script-image h-48 overflow-hidden relative">
+                        <img src="https://picsum.photos/id/243/600/400" alt="刀鞘" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                        <div class="absolute top-3 left-3 bg-tertiary text-white text-xs px-2 py-1 rounded">高分</div>
+                    </div>
+                    <div class="script-info p-6">
+                        <h3 class="script-title text-xl font-bold mb-2">刀鞘</h3>
+                        <div class="script-meta flex items-center justify-between mb-3">
+                            <span class="text-sm bg-gray-100 px-3 py-1 rounded-full">阵营机制</span>
+                            <div class="flex items-center">
+                                <i class="fa fa-star text-yellow-400"></i>
+                                <span class="ml-1">4.9</span>
+                            </div>
+                        </div>
+                        <p class="script-desc text-gray-600 text-sm mb-4 line-clamp-3">1948年12月，国民党天津保密局一片愁云惨淡，针对共产党中央指挥部门的“斩首行动”因为情报泄露而功亏一篑，华北副总司令傅作义大为震怒。更要命的是，代号为“刀鞘”的中共地下党最高负责人，又在狱中离奇死亡。此时天津城正被解放军东北野战军重重包围，孤立无援，天津保密局接到局长毛人凤的命令，要为即将到来的战争做最后的准备...</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">难度：</span>
+                                <div class="flex">
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-primary text-xs"></i>
+                                    <i class="fa fa-circle text-gray-300 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">人数：</span>
+                                <span>7人</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 剧本详情模态框 -->
+    <div id="scriptDetailModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="scriptDetailTitle" class="text-xl font-bold text-gray-800">剧本标题</h3>
+                    <button id="closeScriptDetailModal" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div id="scriptDetailMeta" class="flex items-center justify-between mb-3">
+                    <!-- 剧本元信息 -->
+                </div>
+                <p id="scriptDetailDesc" class="text-gray-600 text-sm mb-4">剧本描述</p>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-500">难度：</span>
+                        <div id="scriptDetailDifficulty" class="flex">
+                            <!-- 剧本难度 -->
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-500">人数：</span>
+                        <span id="scriptDetailPeople">人数</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组局大厅 - 海棠春</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E94560', // 主色调：红色，代表悬疑和激情
+                        secondary: '#1A1A2E', // 辅助色：深蓝，代表神秘感
+                        tertiary: '#16213E', // 第三色：暗蓝，代表沉浸感
+                        accent: '#FFC107', // 强调色：金色，代表重要元素
+                        neutral: '#F5F5F5', // 中性色：浅灰，用于背景
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    }
+                },
+            }
+        }
+    </script>
+    <script>
+        // 模拟用户数据
+        const users = [{
+            username: 'testuser1',
+            password: '123456',
+            joinedSessions: []
+        }, {
+            username: 'testuser2',
+            password: '654321',
+            joinedSessions: [{
+                id: 1,
+                name: '窗边的女人',
+                type: '硬核推理',
+                price: 88,
+                date: '2025-06-26 19:00'
+            }]
+        }];
+
+        // 模拟组局数据
+        const sessions = [{
+            id: 1,
+            name: '窗边的女人',
+            type: '硬核推理',
+            typeColor: '#E94560',
+            location: '北京市朝阳区',
+            totalPeople: 6,
+            currentPeople: 4,
+            price: 88,
+            date: '今日 19:00',
+            imageId: 1035
+        }, {
+            id: 2,
+            name: '你好',
+            type: '情感沉浸',
+            typeColor: '#FFC107',
+            location: '上海市静安区',
+            totalPeople: 6,
+            currentPeople: 3,
+            price: 98,
+            date: '明日 14:00',
+            imageId: 1039
+        }, {
+            id: 3,
+            name: '纸妻',
+            type: '恐怖惊悚',
+            typeColor: '#16213E',
+            location: '广州市天河区',
+            totalPeople: 7,
+            currentPeople: 5,
+            price: 108,
+            date: '周六 19:30',
+            imageId: 1062
+        }, {
+            id: 4,
+            name: '刀鞘',
+            type: '机制阵营',
+            typeColor: '#10B981',
+            location: '深圳市南山区',
+            totalPeople: 7,
+            currentPeople: 2,
+            price: 128,
+            date: '今日 14:00',
+            imageId: 1074
+        }];
+
+        window.addEventListener('load', () => {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const loginButton = document.getElementById('loginButton');
+            const userProfileButton = document.getElementById('userProfileButton');
+            const mobileUserProfileButton = document.getElementById('mobileUserProfileButton');
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const navbar = document.getElementById('navbar');
+
+            // 导航栏滚动效果
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) {
+                    navbar.classList.add('bg-secondary/95', 'backdrop-blur-md', 'shadow-md');
+                } else {
+                    navbar.classList.remove('bg-secondary/95', 'backdrop-blur-md', 'shadow-md');
+                }
+            });
+
+            // 移动端菜单切换
+            mobileMenuButton.addEventListener('click', () => {
+                if (mobileMenu.classList.contains('opacity-0')) {
+                    mobileMenu.classList.remove('opacity-0', '-translate-y-full', 'pointer-events-none');
+                    mobileMenu.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                    mobileMenuButton.innerHTML = '<i class="fa fa-times"></i>';
+                } else {
+                    mobileMenu.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
+                    mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                    mobileMenuButton.innerHTML = '<i class="fa fa-bars"></i>';
+                }
+            });
+
+            // 登录状态更新
+            updateLoginStatus(loggedInUser);
+
+            // 登录按钮点击事件
+            loginButton.addEventListener('click', () => {
+                const loginModal = document.getElementById('loginModal');
+                loginModal.style.opacity = 1;
+                loginModal.style.pointerEvents = 'auto';
+            });
+
+            // 关闭登录模态框
+            document.getElementById('closeModal').addEventListener('click', () => {
+                const loginModal = document.getElementById('loginModal');
+                loginModal.style.opacity = 0;
+                loginModal.style.pointerEvents = 'none';
+            });
+
+            // 登录表单提交
+            document.querySelector('#loginModal button[type="button"]').addEventListener('click', () => {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                const user = users.find(u => u.username === username && u.password === password);
+                if (user) {
+                    localStorage.setItem('loggedInUser', username);
+                    updateLoginStatus(username);
+
+                    const loginModal = document.getElementById('loginModal');
+                    loginModal.style.opacity = 0;
+                    loginModal.style.pointerEvents = 'none';
+
+                    showToast('登录成功');
+                } else {
+                    showToast('用户名或密码错误');
+                }
+            });
+
+            // 为所有“立即加入”按钮绑定点击事件
+            const joinButtons = document.querySelectorAll('.join-button');
+            joinButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (!localStorage.getItem('loggedInUser')) {
+                        showToast('请先登录');
+                        const loginModal = document.getElementById('loginModal');
+                        loginModal.style.opacity = 1;
+                        loginModal.style.pointerEvents = 'auto';
+                        return;
+                    }
+
+                    const sessionCard = button.closest('.bg-white');
+                    const sessionName = sessionCard.querySelector('h3').textContent;
+                    const sessionPrice = button.previousElementSibling.firstElementChild.textContent;
+                    const sessionId = parseInt(sessionCard.getAttribute('data-id'));
+
+                    // 检查是否已经加入
+                    const loggedInUser = localStorage.getItem('loggedInUser');
+                    const user = users.find(u => u.username === loggedInUser);
+                    if (user.joinedSessions.some(s => s.id === sessionId)) {
+                        showToast('你已经加入了这个组局');
+                        return;
+                    }
+
+                    const paymentModal = document.getElementById('paymentModal');
+                    const paymentPrice = document.getElementById('paymentPrice');
+                    const paymentSessionName = document.getElementById('paymentSessionName');
+
+                    paymentPrice.textContent = sessionPrice;
+                    paymentSessionName.textContent = sessionName;
+                    paymentModal.setAttribute('data-session-id', sessionId);
+
+                    paymentModal.style.opacity = 1;
+                    paymentModal.style.pointerEvents = 'auto';
+                });
+            });
+
+            // 为“关闭支付模态框”按钮绑定点击事件
+            document.getElementById('closePaymentModal').addEventListener('click', () => {
+                const paymentModal = document.getElementById('paymentModal');
+                paymentModal.style.opacity = 0;
+                paymentModal.style.pointerEvents = 'none';
+            });
+
+            // 为“立即支付”按钮绑定点击事件
+            document.getElementById('payNowButton').addEventListener('click', () => {
+                const paymentModal = document.getElementById('paymentModal');
+                const sessionId = parseInt(paymentModal.getAttribute('data-session-id'));
+                const session = sessions.find(s => s.id === sessionId);
+
+                if (session) {
+                    const loggedInUser = localStorage.getItem('loggedInUser');
+                    const user = users.find(u => u.username === loggedInUser);
+
+                    // 添加到已加入组局
+                    user.joinedSessions.push({
+                        id: session.id,
+                        name: session.name,
+                        type: session.type,
+                        price: session.price,
+                        date: session.date
+                    });
+
+                    // 更新UI
+                    updateJoinedSessions();
+
+                    // 关闭模态框
+                    paymentModal.style.opacity = 0;
+                    paymentModal.style.pointerEvents = 'none';
+
+                    // 显示成功消息
+                    showToast('支付成功，已加入组局');
+                }
+            });
+
+            // 用户个人中心按钮点击事件
+            document.getElementById('userProfileButton').addEventListener('click', () => {
+                const userProfileModal = document.getElementById('userProfileModal');
+                updateJoinedSessions();
+                userProfileModal.style.opacity = 1;
+                userProfileModal.style.pointerEvents = 'auto';
+            });
+
+            // 移动端用户个人中心按钮点击事件
+            document.getElementById('mobileUserProfileButton').addEventListener('click', () => {
+                const userProfileModal = document.getElementById('userProfileModal');
+                updateJoinedSessions();
+                userProfileModal.style.opacity = 1;
+                userProfileModal.style.pointerEvents = 'auto';
+
+                // 关闭移动菜单
+                mobileMenu.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenuButton.innerHTML = '<i class="fa fa-bars"></i>';
+            });
+
+            // 关闭用户个人中心模态框
+            document.getElementById('closeUserProfileModal').addEventListener('click', () => {
+                const userProfileModal = document.getElementById('userProfileModal');
+                userProfileModal.style.opacity = 0;
+                userProfileModal.style.pointerEvents = 'none';
+            });
+
+            // 退出登录
+            document.getElementById('logoutButton').addEventListener('click', () => {
+                localStorage.removeItem('loggedInUser');
+                updateLoginStatus(null);
+                showToast('已退出登录');
+            });
+        });
+
+        // 更新登录状态
+        function updateLoginStatus(username) {
+            const loginButton = document.getElementById('loginButton');
+            const userProfileButton = document.getElementById('userProfileButton');
+            const mobileUserProfileButton = document.getElementById('mobileUserProfileButton');
+
+            if (username) {
+                loginButton.style.display = 'none';
+                userProfileButton.style.display = 'flex';
+                mobileUserProfileButton.style.display = 'flex';
+
+                const currentUsernameElements = document.querySelectorAll('#currentUsername, #mobileCurrentUsername, #profileUsername');
+                currentUsernameElements.forEach(element => {
+                    element.textContent = username;
+                });
+            } else {
+                loginButton.style.display = 'flex';
+                userProfileButton.style.display = 'none';
+                mobileUserProfileButton.style.display = 'none';
+            }
+        }
+
+        // 更新已加入组局列表
+        function updateJoinedSessions() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (!loggedInUser) return;
+
+            const user = users.find(u => u.username === loggedInUser);
+            const joinedSessionsContainer = document.getElementById('joinedSessions');
+
+            if (user.joinedSessions.length === 0) {
+                joinedSessionsContainer.innerHTML = '<p class="text-center text-gray-500 py-4">您还没有加入任何组局</p>';
+                return;
+            }
+
+            let html = '';
+            user.joinedSessions.forEach(session => {
+                html += `
+                <div class="border-b border-gray-200 pb-3 mb-3 last:border-0 last:mb-0 last:pb-0">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-medium">${session.name}</h4>
+                            <p class="text-sm text-gray-500">${session.type} | ${session.date}</p>
+                        </div>
+                        <span class="text-primary font-medium">¥${session.price}</span>
+                    </div>
+                </div>
+                `;
+            });
+
+            joinedSessionsContainer.innerHTML = html;
+        }
+
+        // 显示提示消息
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-secondary text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 opacity-0';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            // 显示动画
+            setTimeout(() => {
+                toast.classList.remove('opacity-0');
+                toast.classList.add('opacity-100');
+            }, 10);
+
+            // 隐藏动画
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities { .content-auto { content-visibility: auto; } .text-shadow { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); } .text-shadow-lg { text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); } .bg-gradient-overlay { background: linear-gradient(to bottom, rgba(0,
+        0, 0, 0.2), rgba(0, 0, 0, 0.7)); } .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; } .progress-bar { height: 6px; background-color: #e2e8f0; border-radius: 3px; overflow:
+        hidden; } .progress-value { height: 100%; background-color: #E94560; border-radius: 3px; transition: width 0.3s ease; } }
+    </style>
+</head>
+
+<body class="font-inter bg-neutral text-gray-800 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <img src="logo.jpg" alt="海棠春logo" class="h-8 sm:h-10 object-contain">
+                    <span class="text-xl sm:text-2xl font-bold text-white">海棠春</span>
+                </div>
+
+                <!-- 桌面导航 -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="index-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">首页</a>
+                    <a href="script-library-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">剧本库</a>
+                    <a href="session-hall-JYLY.html" class="text-primary hover:text-primary/80 transition-colors font-medium">组局大厅</a>
+                    <a href="creator-platform-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">创作者平台</a>
+                    <a href="newbie-guide-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">新手教程</a>
+                    <a href="about-us-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">关于我们</a>
+                </nav>
+
+                <!-- 用户操作区 -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative hidden sm:block">
+                        <input type="text" placeholder="搜索组局..." class="bg-white/10 backdrop-blur-sm text-white placeholder-white/60 pl-10 pr-4 py-2 rounded-full w-48 lg:w-64 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                    </div>
+                    <button id="loginButton" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full transition-all flex items-center space-x-1">
+                        <i class="fa fa-user-circle"></i>
+                        <span class="hidden sm:inline">登录/注册</span>
+                    </button>
+                    <button id="userProfileButton" class="hidden bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-all flex items-center space-x-1">
+                        <i class="fa fa-user"></i>
+                        <span id="currentUsername" class="hidden sm:inline">用户名</span>
+                    </button>
+                    <!-- 移动端菜单按钮 -->
+                    <button id="mobileMenuButton" class="md:hidden text-white text-xl">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 移动端导航菜单 -->
+        <div id="mobileMenu" class="md:hidden bg-secondary/95 backdrop-blur-md absolute w-full left-0 top-full transform -translate-y-full opacity-0 transition-all duration-300 pointer-events-none">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex flex-col space-y-4">
+                    <a href="index-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">首页</a>
+                    <a href="script-library-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">剧本库</a>
+                    <a href="session-hall-JYLY.html" class="text-primary hover:text-primary/80 transition-colors font-medium py-2">组局大厅</a>
+                    <a href="creator-platform-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">创作者平台</a>
+                    <a href="newbie-guide-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">新手教程</a>
+                    <a href="about-us-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">关于我们</a>
+                    <div class="relative mt-2">
+                        <input type="text" placeholder="搜索组局..." class="bg-white/10 backdrop-blur-sm text-white placeholder-white/60 pl-10 pr-4 py-2 rounded-full w-full focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                    </div>
+                    <div class="pt-4 border-t border-white/10 flex justify-between">
+                        <button id="mobileUserProfileButton" class="hidden bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-all flex items-center space-x-1">
+                            <i class="fa fa-user"></i>
+                            <span id="mobileCurrentUsername">用户名</span>
+                        </button>
+                        <button id="loginButtonMobile" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full transition-all flex items-center space-x-1">
+                            <i class="fa fa-user-circle"></i>
+                            <span>登录/注册</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">用户登录</h3>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-user"></i>
+                            </span>
+                            <input type="text" id="username" placeholder="请输入用户名" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-lock"></i>
+                            </span>
+                            <input type="password" id="password" placeholder="请输入密码" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <button type="button" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all">登录</button>
+                </form>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p class="text-center text-sm text-gray-600">还没有账号？<a href="#" class="text-primary hover:underline">立即注册</a></p>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="social-icon bg-[#07C160]/10 hover:bg-[#07C160]/20 text-[#07C160] p-2 rounded-full transition-all">
+                            <i class="fa fa-weixin text-xl"></i>
+                        </button>
+                        <button class="social-icon bg-[#E6162D]/10 hover:bg-[#E6162D]/20 text-[#E6162D] p-2 rounded-full transition-all">
+                            <i class="fa fa-weibo text-xl"></i>
+                        </button>
+                        <button class="social-icon bg-[#12B7F5]/10 hover:bg-[#12B7F5]/20 text-[#12B7F5] p-2 rounded-full transition-all">
+                            <i class="fa fa-qq text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户个人中心模态框 -->
+    <div id="userProfileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">用户中心</h3>
+                    <button id="closeUserProfileModal" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+                        <i class="fa fa-user text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg" id="profileUsername">用户名</h4>
+                        <p class="text-sm text-gray-500">加入时间: 2025-01-01</p>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <h4 class="font-medium mb-3">已加入组局</h4>
+                    <div id="joinedSessions" class="space-y-3 max-h-60 overflow-y-auto">
+                        <!-- 动态内容 -->
+                    </div>
+                </div>
+                <button id="logoutButton" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-all">退出登录</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面标题区 -->
+    <section class="relative h-40 md:h-60 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-secondary to-tertiary"></div>
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center relative z-10">
+            <div>
+                <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-white text-shadow-lg">组局大厅</h1>
+                <p class="text-white/80 mt-2">找到合适的伙伴，开启你的剧本杀之旅</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 面包屑导航 -->
+    <section class="py-4 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center text-sm text-gray-600">
+                <a href="index-JYLY.html" class="hover:text-primary">首页</a>
+                <span class="mx-2">/</span>
+                <span class="text-primary">组局大厅</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 组局大厅内容区 -->
+    <section class="py-10 bg-neutral">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- 筛选栏 -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">剧本类型</label>
+                        <select class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                            <option value="">全部类型</option>
+                            <option value="hard">硬核推理</option>
+                            <option value="emotion">情感沉浸</option>
+                            <option value="horror">恐怖惊悚</option>
+                            <option value="mechanism">机制阵营</option>
+                            <option value="comedy">欢乐撕逼</option>
+                            <option value="science">科幻奇幻</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">人数</label>
+                        <select class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                            <option value="">不限</option>
+                            <option value="4">4人</option>
+                            <option value="5">5人</option>
+                            <option value="6">6人</option>
+                            <option value="7">7人</option>
+                            <option value="8">8人</option>
+                            <option value="9+">9人以上</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">时间</label>
+                        <select class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                            <option value="">今天</option>
+                            <option value="tomorrow">明天</option>
+                            <option value="weekend">周末</option>
+                            <option value="future">未来7天</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">城市</label>
+                        <select class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                            <option value="">全国</option>
+                            <option value="beijing">北京</option>
+                            <option value="shanghai">上海</option>
+                            <option value="guangzhou">广州</option>
+                            <option value="shenzhen">深圳</option>
+                            <option value="hangzhou">杭州</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <button class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all">
+                        <i class="fa fa-search mr-2"></i>搜索
+                    </button>
+                    <button class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-all">
+                        <i class="fa fa-sliders mr-2"></i>更多筛选
+                    </button>
+                    <button class="px-4 py-2 bg-tertiary hover:bg-tertiary/90 text-white rounded-lg transition-all">
+                        <i class="fa fa-plus mr-2"></i>发布组局
+                    </button>
+                </div>
+            </div>
+
+            <!-- 组局列表 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 组局卡片 -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-card-hover transition-all" data-id="1">
+                    <div class="relative">
+                        <img src="https://picsum.photos/id/1035/600/300" alt="窗边的女人剧本杀组局" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 left-4 bg-primary text-white text-sm font-medium px-3 py-1 rounded-full">
+                            硬核推理
+                        </div>
+                        <div class="absolute top-4 right-4 bg-secondary text-white text-sm font-medium px-3 py-1 rounded-full">
+                            今日 19:00
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">窗边的女人</h3>
+                        <div class="flex items-center text-gray-500 text-sm mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-map-marker mr-1"></i> 北京市朝阳区</span>
+                            <span class="flex items-center"><i class="fa fa-user mr-1"></i> 已有人数：4/6</span>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>拼车进度</span>
+                                <span class="font-medium">66%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 66%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-primary font-bold text-xl">¥88</span>
+                                <span class="text-gray-500 text-sm">/人</span>
+                            </div>
+                            <button class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all join-button">
+                                立即加入
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-card-hover transition-all" data-id="2">
+                    <div class="relative">
+                        <img src="https://picsum.photos/id/1039/600/300" alt="你好剧本杀组局" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 left-4 bg-accent text-gray-800 text-sm font-medium px-3 py-1 rounded-full">
+                            情感沉浸
+                        </div>
+                        <div class="absolute top-4 right-4 bg-secondary text-white text-sm font-medium px-3 py-1 rounded-full">
+                            明日 14:00
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">你好</h3>
+                        <div class="flex items-center text-gray-500 text-sm mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-map-marker mr-1"></i> 上海市静安区</span>
+                            <span class="flex items-center"><i class="fa fa-user mr-1"></i> 已有人数：3/6</span>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>拼车进度</span>
+                                <span class="font-medium">50%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-primary font-bold text-xl">¥98</span>
+                                <span class="text-gray-500 text-sm">/人</span>
+                            </div>
+                            <button class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all join-button">
+                                立即加入
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-card-hover transition-all" data-id="3">
+                    <div class="relative">
+                        <img src="https://picsum.photos/id/1062/600/300" alt="纸妻剧本杀组局" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 left-4 bg-tertiary text-white text-sm font-medium px-3 py-1 rounded-full">
+                            恐怖惊悚
+                        </div>
+                        <div class="absolute top-4 right-4 bg-secondary text-white text-sm font-medium px-3 py-1 rounded-full">
+                            周六 19:30
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">纸妻</h3>
+                        <div class="flex items-center text-gray-500 text-sm mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-map-marker mr-1"></i> 广州市天河区</span>
+                            <span class="flex items-center"><i class="fa fa-user mr-1"></i> 已有人数：5/7</span>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>拼车进度</span>
+                                <span class="font-medium">71%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 71%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-primary font-bold text-xl">¥108</span>
+                                <span class="text-gray-500 text-sm">/人</span>
+                            </div>
+                            <button class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all join-button">
+                                立即加入
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-card-hover transition-all" data-id="4">
+                    <div class="relative">
+                        <img src="https://picsum.photos/id/1074/600/300" alt="刀鞘剧本杀组局" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 left-4 bg-green-500 text-white text-sm font-medium px-3 py-1 rounded-full">
+                            机制阵营
+                        </div>
+                        <div class="absolute top-4 right-4 bg-secondary text-white text-sm font-medium px-3 py-1 rounded-full">
+                            今日 14:00
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">刀鞘</h3>
+                        <div class="flex items-center text-gray-500 text-sm mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-map-marker mr-1"></i> 深圳市南山区</span>
+                            <span class="flex items-center"><i class="fa fa-user mr-1"></i> 已有人数：2/7</span>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>拼车进度</span>
+                                <span class="font-medium">29%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 29%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-primary font-bold text-xl">¥128</span>
+                                <span class="text-gray-500 text-sm">/人</span>
+                            </div>
+                            <button class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all join-button">
+                                立即加入
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 支付模态框 -->
+    <div id="paymentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">支付确认</h3>
+                    <button id="closePaymentModal" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <p class="text-sm text-gray-500">剧本名称</p>
+                    <p class="font-medium" id="paymentSessionName"></p>
+                </div>
+                <p class="text-lg font-medium">本次支付金额：<span id="paymentPrice"></span></p>
+                <div class="mt-6 grid grid-cols-3 gap-3">
+                    <button class="border-2 border-primary rounded-lg p-3 flex flex-col items-center text-primary">
+                        <i class="fa fa-credit-card text-xl mb-1"></i>
+                        <span class="text-xs">余额支付</span>
+                    </button>
+                    <button class="border-2 border-gray-200 hover:border-primary rounded-lg p-3 flex flex-col items-center text-gray-500 hover:text-primary transition-colors">
+                        <i class="fa fa-weixin text-xl mb-1"></i>
+                        <span class="text-xs">微信支付</span>
+                    </button>
+                    <button class="border-2 border-gray-200 hover:border-primary rounded-lg p-3 flex flex-col items-center text-gray-500 hover:text-primary transition-colors">
+                        <i class="fa fa-credit-card text-xl mb-1"></i>
+                        <span class="text-xs">支付宝</span>
+                    </button>
+                </div>
+                <button id="payNowButton" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all mt-6">立即支付</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

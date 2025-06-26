@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于我们 - 海棠春</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E94560', // 主色调：红色，代表悬疑和激情
+                        secondary: '#1A1A2E', // 辅助色：深蓝，代表神秘感
+                        tertiary: '#16213E', // 第三色：暗蓝，代表沉浸感
+                        accent: '#FFC107', // 强调色：金色，代表重要元素
+                        neutral: '#F5F5F5', // 中性色：浅灰，用于背景
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    }
+                },
+            }
+        }
+    </script>
+    <script>
+        window.addEventListener('load', () => {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const loginButton = document.getElementById('loginButton');
+            const userProfileButton = document.getElementById('userProfileButton');
+            const mobileUserProfileButton = document.getElementById('mobileUserProfileButton');
+
+            if (loggedInUser) {
+                loginButton.style.display = 'none';
+                userProfileButton.style.display = 'flex';
+                mobileUserProfileButton.style.display = 'flex';
+                const currentUsernameElements = document.querySelectorAll('#currentUsername, #mobileCurrentUsername, #profileUsername, #displayUsername');
+                currentUsernameElements.forEach(element => {
+                    element.textContent = loggedInUser;
+                });
+
+                // 查找用户并显示密码
+                const user = users.find(user => user.username === loggedInUser);
+                if (user) {
+                    document.getElementById('displayPassword').textContent = user.password;
+                }
+            } else {
+                loginButton.style.display = 'flex';
+                userProfileButton.style.display = 'none';
+                mobileUserProfileButton.style.display = 'none';
+            }
+        });
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities { .content-auto { content-visibility: auto; } .text-shadow { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); } .text-shadow-lg { text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); } .bg-gradient-overlay { background: linear-gradient(to bottom, rgba(0,
+        0, 0, 0.2), rgba(0, 0, 0, 0.7)); } .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; } }
+    </style>
+</head>
+
+<body class="font-inter bg-neutral text-gray-800 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <img src="logo.jpg" alt="海棠春logo" class="h-8 sm:h-10 object-contain">
+                    <span class="text-xl sm:text-2xl font-bold text-white">海棠春</span>
+                </div>
+
+                <!-- 桌面导航 -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="index-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">首页</a>
+                    <a href="script-library-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">剧本库</a>
+                    <a href="session-hall-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">组局大厅</a>
+                    <a href="creator-platform-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">创作者平台</a>
+                    <a href="newbie-guide-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">新手教程</a>
+                    <a href="about-us-JYLY.html" class="text-primary hover:text-primary/80 transition-colors font-medium">关于我们</a>
+                </nav>
+
+                <!-- 用户操作区 -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative hidden sm:block">
+                        <input type="text" placeholder="搜索剧本..." class="bg-white/10 backdrop-blur-sm text-white placeholder-white/60 pl-10 pr-4 py-2 rounded-full w-48 lg:w-64 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                    </div>
+                    <button id="loginButton" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full transition-all flex items-center space-x-1">
+                        <i class="fa fa-user-circle"></i>
+                        <span class="hidden sm:inline">登录/注册</span>
+                    </button>
+                    <button id="logoutButton" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full transition-all flex items-center space-x-1 hidden">
+                        <i class="fa fa-sign-out"></i>
+                        <span class="hidden sm:inline">退出登录</span>
+                    </button>
+                    <!-- 移动端菜单按钮 -->
+                    <button id="mobileMenuButton" class="md:hidden text-white text-xl">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 移动端导航菜单 -->
+        <div id="mobileMenu" class="md:hidden bg-secondary/95 backdrop-blur-md absolute w-full left-0 top-full transform -translate-y-full opacity-0 transition-all duration-300 pointer-events-none">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex flex-col space-y-4">
+                    <a href="index-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">首页</a>
+                    <a href="script-library-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">剧本库</a>
+                    <a href="session-hall-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">组局大厅</a>
+                    <a href="creator-platform-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">创作者平台</a>
+                    <a href="newbie-guide-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">新手教程</a>
+                    <a href="about-us-JYLY.html" class="text-primary hover:text-primary/80 transition-colors font-medium py-2">关于我们</a>
+                    <div class="relative mt-2">
+                        <input type="text" placeholder="搜索剧本..." class="bg-white/10 backdrop-blur-sm text-white placeholder-white/60 pl-10 pr-4 py-2 rounded-full w-full focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">用户登录</h3>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-user"></i>
+                            </span>
+                            <input type="text" id="username" placeholder="请输入用户名" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-lock"></i>
+                            </span>
+                            <input type="password" id="password" placeholder="请输入密码" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <button type="button" id="loginSubmit" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all">登录</button>
+                </form>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p class="text-center text-sm text-gray-600">还没有账号？<a href="#" class="text-primary hover:underline">立即注册</a></p>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="social-icon bg-[#07C160]/10 hover:bg-[#07C160]/20 text-[#07C160] p-2 rounded-full transition-all">
+                            <i class="fa fa-weixin text-xl"></i>
+                        </button>
+                        <button class="social-icon bg-[#E6162D]/10 hover:bg-[#E6162D]/20 text-[#E6162D] p-2 rounded-full transition-all">
+                            <i class="fa fa-weibo text-xl"></i>
+                        </button>
+                        <button class="social-icon bg-[#12B7F5]/10 hover:bg-[#12B7F5]/20 text-[#12B7F5] p-2 rounded-full transition-all">
+                            <i class="fa fa-qq text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面标题区 -->
+    <section class="relative h-40 md:h-60 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-secondary to-tertiary"></div>
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center relative z-10">
+            <div>
+                <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-white text-shadow-lg">关于我们</h1>
+                <p class="text-white/80 mt-2">了解剧本杀之家背后的故事</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 面包屑导航 -->
+    <section class="py-4 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center text-sm text-gray-600">
+                <a href="index-JYLY.html" class="hover:text-primary">首页</a>
+                <span class="mx-2">/</span>
+                <span class="text-primary">关于我们</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我们内容区 -->
+    <section class="py-10 bg-neutral">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 关于我们主内容 -->
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="bg-white rounded-xl shadow-md p-8">
+                        <h2 class="text-2xl font-bold mb-4">我们的故事</h2>
+                        <p class="text-gray-600 leading-relaxed mb-6">剧本杀之家成立于2023年，由一群热爱剧本杀的年轻人创立。我们最初只是几个朋友经常聚在一起玩剧本杀，后来发现身边越来越多的人对这种游戏形式感兴趣，但却面临着找不到合适剧本、组局困难等问题。</p>
+                        <p class="text-gray-600 leading-relaxed mb-6">于是，我们决定创建一个平台，希望能够解决这些问题，让更多人能够轻松地接触和参与剧本杀游戏。经过几个月的筹备和开发，剧本杀之家网站正式上线。</p>
+                        <p class="text-gray-600 leading-relaxed">从成立至今，我们不断完善平台功能，丰富剧本资源，已经吸引了数万剧本杀爱好者的加入。未来，我们将继续努力，为大家带来更好的体验。</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-md p-8">
+                        <h2 class="text-2xl font-bold mb-4">我们的团队</h2>
+                        <p class="text-gray-600 leading-relaxed mb-6">我们是一群充满激情和创意的年轻人，来自不同的专业背景，但都有一个共同的爱好——剧本杀。我们相信，剧本杀不仅仅是一种游戏，更是一种社交方式，一种体验不同人生的途径。</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+                            <div class="flex items-start">
+                                <img src="https://picsum.photos/id/1005/100/100" alt="创始人" class="w-16 h-16 rounded-full object-cover mr-4">
+                                <div>
+                                    <h3 class="font-semibold text-lg">vera</h3>
+                                    <p class="text-gray-500 text-sm">创始人 & CEO</p>
+                                    <p class="text-gray-600 text-sm mt-1">前游戏设计师，资深剧本杀玩家，拥有丰富的行业经验。</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <img src="https://picsum.photos/id/1006/100/100" alt="运营总监 " class="w-16 h-16 rounded-full object-cover mr-4">
+                                <div>
+                                    <h3 class="font-semibold text-lg">胡胡</h3>
+                                    <p class="text-gray-500 text-sm">运营总监</p>
+                                    <p class="text-gray-600 text-sm mt-1">曾在多家互联网公司负责运营工作，对用户体验有深刻理解。</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <img src="https://picsum.photos/id/1012/100/100" alt="技术总监" class="w-16 h-16 rounded-full object-cover mr-4">
+                                <div>
+                                    <h3 class="font-semibold text-lg">甘蔗</h3>
+                                    <p class="text-gray-500 text-sm">技术总监</p>
+                                    <p class="text-gray-600 text-sm mt-1">资深后端工程师，擅长系统架构设计，曾参与多个大型项目开发。</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <img src="https://picsum.photos/id/1027/100/100" alt="剧本编辑" class="w-16 h-16 rounded-full object-cover mr-4">
+                                <div>
+                                    <h3 class="font-semibold text-lg">fufu</h3>
+                                    <p class="text-gray-500 text-sm">剧本编辑</p>
+                                    <p class="text-gray-600 text-sm mt-1">剧本杀作者，擅长故事创作和角色设计，已创作多个热门剧本。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-md p-8">
+                        <h2 class="text-2xl font-bold mb-4">联系我们</h2>
+                        <p class="text-gray-600 leading-relaxed mb-6">如果你有任何问题、建议或合作意向，欢迎通过以下方式联系我们：</p>
+
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fa fa-envelope text-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium">邮箱</h3>
+                                    <p class="text-gray-600"><a href="https://mail.qq.com/" target="_blank">2941772302@qq.com</a></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fa fa-phone text-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium">电话</h3>
+                                    <p class="text-gray-600">+86 13757187864/p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fa fa-map-marker text-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium">地址</h3>
+                                    <p class="text-gray-600">
+
+                                        <a href="https://map.baidu.com/search/你的实际地址/" target="_blank">布雷诺</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            <h3 class="font-semibold mb-4">关注我们</h3>
+                            <div class="flex space-x-4">
+                                <a href="#" class="w-10 h-10 bg-[#07C160]/10 hover:bg-[#07C160]/20 text-[#07C160] rounded-full flex items-center justify-center transition-all">
+                                    <i class="fa fa-weixin text-xl"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-[#E6162D]/10 hover:bg-[#E6162D]/20 text-[#E6162D] rounded-full flex items-center justify-center transition-all">
+                                    <i class="fa fa-weibo text-xl"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-[#12B7F5]/10 hover:bg-[#12B7F5]/20 text-[#12B7F5] rounded-full flex items-center justify-center transition-all">
+                                    <i class="fa fa-qq text-xl"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 text-[#1DA1F2] rounded-full flex items-center justify-center transition-all">
+                                    <i class="fa fa-twitter text-xl"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 侧边栏 -->
+                <div class="space-y-8">
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h2 class="text-xl font-bold mb-4">我们的使命</h2>
+                        <p class="text-gray-600 leading-relaxed">我们的使命是让更多人体验到剧本杀的魅力。通过提供丰富的剧本资源、便捷的组局服务和优质的交流社区，降低剧本杀的参与门槛，让每个人都能轻松享受剧本杀带来的快乐。</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h2 class="text-xl font-bold mb-4">我们的愿景</h2>
+                        <p>赠你草原之春，贈你生机与希望</p>
+                        <p>一同看阿尔金山的雪 一起看孔雀湖的鱼 一同去往西州的每一个地方看过每一片美景</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+                    const loginButton = document.getElementById('loginButton');
+                    const logoutButton = document.getElementById('logoutButton');
+                    const loginModal = document.getElementById('loginModal');
+                    const closeModal = document.getElementById('closeModal');
+                    const loginSubmit = document.getElementById('loginSubmit');
+
+                    // 用户数据存储
+                    const users = [];
+
+                    // 页面加载时检查是否已登录
+                    window.addEventListener('load', () => {
+                        const loggedInUser = localStorage.getItem('loggedInUser');
+                        if (loggedInUser) {
+                            loginButton.style.display = 'none';
+                            document.getElementById('userProfileButton').style.display = 'flex';
+                            document.getElementById('mobileUserProfileButton').style.display = 'flex';
+                            document.getElementById('currentUsername').textContent = loggedInUser;
+                            document.getElementById('mobileCurrentUsername').textContent = loggedInUser;
+                            document.getElementById('profileUsername').textContent = loggedInUser;
+                            document.getElementById('displayUsername').textContent = loggedInUser;
+
+                            // 查找用户并显示密码
+                            const user = users.find(user => user.username === loggedInUser);
+                            if (user) {
+                                document.getElementById('displayPassword').textContent = user.password;
+                            }
+                        }
+                    });
+
+                    // 注册功能
+                    const registerSubmit = document.getElementById('registerSubmit');
+                    registerSubmit.addEventListener('click', () => {
+                        const registerUsername = document.getElementById('registerUsername').value;
+                        const registerPassword = document.getElementById('registerPassword').value;
+                        const confirmPassword = document.getElementById('confirmPassword').value;
+
+                        // 正则表达式验证
+                        const usernameRegex = /^[a-zA-Z0-9]{3,16}$/;
+                        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+
+                        if (!usernameRegex.test(registerUsername)) {
+                            alert('用户名必须由3到16位字母或数字组成');
+                            return;
+                        }
+
+                        if (!passwordRegex.test(registerPassword)) {
+                            alert('密码必须包含至少一个小写字母、一个大写字母和一个数字，且长度至少为8位');
+                            return;
+                        }
+
+                        if (registerPassword !== confirmPassword) {
+                            alert('两次输入的密码不一致');
+                            return;
+                        }
+
+                        // 检查用户名是否已存在
+                        const existingUser = users.find(user => user.username === registerUsername);
+                        if (existingUser) {
+                            alert('该用户名已被注册');
+                            return;
+                        }
+
+                        // 注册成功
+                        users.push({
+                            username: registerUsername,
+                            password: registerPassword,
+                            registrationDate: new Date().toISOString().split('T')[0]
+                        });
+                        alert('注册成功，请登录');
+                        registerModal.classList.add('opacity-0', 'pointer-events-none');
+                        registerModal.querySelector('div').classList.add('scale-95');
+                        registerModal.querySelector('div').classList.remove('scale-100');
+                        loginModal.classList.remove('opacity-0', 'pointer-events-none');
+                        loginModal.querySelector('div').classList.remove('scale-95');
+                        loginModal.querySelector('div').classList.add('scale-100');
+                    });
+
+                    // 登录功能
+                    const loginSubmit = document.getElementById('loginSubmit');
+                    loginSubmit.addEventListener('click', () => {
+                        const loginUsername = document.getElementById('loginUsername').value;
+                        const loginPassword = document.getElementById('loginPassword').value;
+
+                        // 查找用户
+                        const user = users.find(user => user.username === loginUsername && user.password === loginPassword);
+
+                        if (user) {
+                            alert('登录成功');
+                            loginModal.classList.add('opacity-0', 'pointer-events-none');
+                            loginModal.querySelector('div').classList.add('scale-95');
+                            loginModal.querySelector('div').classList.remove('scale-100');
+
+                            // 隐藏登录按钮，显示用户按钮
+                            loginButton.style.display = 'none';
+                            document.getElementById('userProfileButton').style.display = 'flex';
+                            document.getElementById('mobileUserProfileButton').style.display = 'flex';
+                            document.getElementById('currentUsername').textContent = loginUsername;
+                            document.getElementById('mobileCurrentUsername').textContent = loginUsername;
+                            document.getElementById('profileUsername').textContent = loginUsername;
+                            document.getElementById('displayUsername').textContent = loginUsername;
+                            document.getElementById('displayPassword').textContent = loginPassword;
+                            document.getElementById('registrationDate').textContent = user.registrationDate || '2025-01-01';
+
+                            // 将用户信息存储到localStorage
+                            localStorage.setItem('loggedInUser', loginUsername);
+                        } else {
+                            alert('用户名或密码错误');
+                        }
+                    });
+
+                    // 用户个人中心模态框
+                    const userProfileButton = document.getElementById('userProfileButton');
+                    const mobileUserProfileButton = document.getElementById('mobileUserProfileButton');
+                    const userProfileModal = document.getElementById('userProfileModal');
+                    const closeUserProfileModal = document.getElementById('closeUserProfileModal');
+                    const togglePassword = document.getElementById('togglePassword');
+                    const displayPassword = document.getElementById('displayPassword');
+                    const logoutButton = document.getElementById('logoutButton');
+
+                    // 显示用户个人中心
+                    function showUserProfile() {
+                        const loggedInUser = localStorage.getItem('loggedInUser');
+                        if (loggedInUser) {
+                            // 查找用户
+                            const user = users.find(user => user.username === loggedInUser);
+                            if (user) {
+                                document.getElementById('profileUsername').textContent = user.username;
+                                document.getElementById('displayUsername').textContent = user.username;
+                                document.getElementById('displayPassword').textContent = '••••••••';
+                                document.getElementById('registrationDate').textContent = user.registrationDate || '2025-01-01';
+                            }
+
+                            userProfileModal.classList.remove('opacity-0', 'pointer-events-none');
+                            userProfileModal.querySelector('div').classList.remove('scale-95');
+                            userProfileModal.querySelector('div').classList.add('scale-100');
+                        }
+                    }
+
+                    userProfileButton.addEventListener('click', showUserProfile);
+                    mobileUserProfileButton.addEventListener('click', () => {
+                        // 关闭移动菜单
+                        mobileMenu.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
+                        mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                        mobileMenuButton.innerHTML = '<i class="fa fa-bars"></i>';
+
+                        // 显示个人中心
+                        showUserProfile();
+                    });
+
+                    // 关闭用户个人中心
+                    closeUserProfileModal.addEventListener('click', () => {
+                        userProfileModal.classList.add('opacity-0', 'pointer-events-none');
+                        userProfileModal.querySelector('div').classList.add('scale-95');
+                        userProfileModal.querySelector('div').classList.remove('scale-100');
+                    });
+
+                    // 点击模态框外部关闭
+                    userProfileModal.addEventListener('click', (e) => {
+                        if (e.target === userProfileModal) {
+                            userProfileModal.classList.add('opacity-0', 'pointer-events-none');
+                            userProfileModal.querySelector('div').classList.add('scale-95');
+                            userProfileModal.querySelector('div').classList.remove('scale-100');
+                        }
+                    });
+
+                    // 切换密码可见性
+                    togglePassword.addEventListener('click', () => {
+                        const loggedInUser = localStorage.getItem('loggedInUser');
+                        if (loggedInUser) {
+                            const user = users.find(user => user.username === loggedInUser);
+                            if (user) {
+                                if (displayPassword.textContent === '••••••••') {
+                                    displayPassword.textContent = user.password;
+                                    togglePassword.innerHTML = '<i class="fa fa-eye"></i>';
+                                } else {
+                                    displayPassword.textContent = '••••••••';
+                                    togglePassword.innerHTML = '<i class="fa fa-eye-slash"></i>';
+                                }
+                            }
+                        }
+                    });
+
+                    // 退出登录
+                    logoutButton.addEventListener('click', () => {
+                        localStorage.removeItem('loggedInUser');
+                        userProfileModal.classList.add('opacity-0', 'pointer-events-none');
+                        userProfileModal.querySelector('div').classList.add('scale-95');
+                        userProfileModal.querySelector('div').classList.remove('scale-100');
+                        loginButton.style.display = 'flex';
+                        document.getElementById('userProfileButton').style.display = 'none';
+                        document.getElementById('mobileUserProfileButton').style.display = 'none';
+                        alert('已退出登录');
+                    });
+    </script>
+    });
+    </script>
+</body>
+
+</html>

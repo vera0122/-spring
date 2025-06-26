@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据可视化饼图 - 剧本杀市场分析</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <!-- 配置 Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5', // 主色调：深蓝（代表信任与专业）
+                        secondary: '#EC4899', // 辅助色：粉紫（代表创意与娱乐）
+                        neutral: '#1F2937', // 中性色：深灰
+                        'neutral-light': '#F3F4F6', // 浅灰背景
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities { .content-auto { content-visibility: auto; } .card-shadow { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); } .chart-container { transition: all 0.3s ease; } .chart-container:hover { transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); } }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-inter text-neutral">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-chart-pie text-primary text-2xl mr-3"></i>
+                    <span class="text-xl font-bold">DataViz</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-primary font-medium hover:text-primary/80 transition-colors">首页</a>
+                    <a href="#" class="text-gray-600 hover:text-primary transition-colors">图表库</a>
+                    <a href="#" class="text-gray-600 hover:text-primary transition-colors">关于我们</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- 页面标题 -->
+        <div class="mb-8 text-center">
+            <h1 class="text-[clamp(2rem,5vw,3rem)] font-bold text-neutral mb-2">剧本杀市场数据可视化</h1>
+            <p class="text-gray-600 max-w-3xl mx-auto">通过交互式饼图直观展示剧本杀行业的各类数据分布，助力玩家选择、店家决策和创作者洞察市场趋势。</p>
+        </div>
+
+        <!-- 数据卡片和图表 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 饼图区域 1：剧本类型分布 -->
+            <div class="bg-white rounded-xl p-6 card-shadow chart-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-neutral">2024年剧本杀类型市场占比</h2>
+                    <div class="flex space-x-2">
+                        <button id="type-pie" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">饼图</button>
+                        <button id="type-doughnut" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors">环形图</button>
+                    </div>
+                </div>
+                <div class="h-[350px]" id="typeChart"></div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>数据来源：2024年上半年全国剧本杀行业报告，总统计剧本数：2,856款</p>
+                </div>
+            </div>
+
+            <!-- 饼图区域 2：玩家偏好 -->
+            <div class="bg-white rounded-xl p-6 card-shadow chart-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-neutral">玩家最看重的剧本元素</h2>
+                    <div class="flex space-x-2">
+                        <button id="element-pie" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">饼图</button>
+                        <button id="element-doughnut" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors">环形图</button>
+                    </div>
+                </div>
+                <div class="h-[350px]" id="elementChart"></div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>数据来源：对1,200名剧本杀玩家的问卷调查，按"非常重要"选项占比统计</p>
+                </div>
+            </div>
+
+            <!-- 饼图区域 3：玩家年龄分布 -->
+            <div class="bg-white rounded-xl p-6 card-shadow chart-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-neutral">剧本杀玩家年龄分布</h2>
+                    <div class="flex space-x-2">
+                        <button id="age-pie" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">饼图</button>
+                        <button id="age-doughnut" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors">环形图</button>
+                    </div>
+                </div>
+                <div class="h-[350px]" id="ageChart"></div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>数据来源：2024年剧本杀行业白皮书，基于全国300家实体店会员数据</p>
+                </div>
+            </div>
+
+            <!-- 饼图区域 4：复玩率分析 -->
+            <div class="bg-white rounded-xl p-6 card-shadow chart-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-neutral">不同类型剧本复玩率</h2>
+                    <div class="flex space-x-2">
+                        <button id="replay-pie" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">饼图</button>
+                        <button id="replay-doughnut" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors">环形图</button>
+                    </div>
+                </div>
+                <div class="h-[350px]" id="replayChart"></div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>复玩率定义：同一玩家1年内重复体验同一剧本的比例，样本量：50,000+玩家</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据洞察 -->
+        <div class="mt-12 bg-white rounded-xl p-6 card-shadow">
+            <h2 class="text-xl font-semibold text-neutral mb-4">数据洞察与趋势分析</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-primary">
+                    <h3 class="font-medium text-primary mb-2"><i class="fa-solid fa-lightbulb mr-2"></i>市场趋势</h3>
+                    <p class="text-gray-700">情感本市场占比持续增长，2024年上半年已达40%，成为最主流的剧本类型。</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-secondary">
+                    <h3 class="font-medium text-secondary mb-2"><i class="fa-solid fa-users mr-2"></i>用户画像</h3>
+                    <p class="text-gray-700">18-25岁年轻群体占比超60%，是剧本杀核心用户，但30岁以上玩家增速最快。</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                    <h3 class="font-medium text-green-600 mb-2"><i class="fa-solid fa-line-chart mr-2"></i>商业建议</h3>
+                    <p class="text-gray-700">机制本复玩率高达28%，建议店家增加此类剧本采购，并设计差异化玩法提升用户粘性。</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-neutral text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-chart-pie text-primary text-2xl mr-3"></i>
+                        <span class="text-xl font-bold">DataViz</span>
+                    </div>
+                    <p class="text-gray-400 mt-2">用数据驱动剧本杀行业发展</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-brands fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-brands fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-brands fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-gray-700 text-center text-gray-400 text-sm">
+                <p>© 2024 DataViz. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 剧本类型分布数据
+            const typeData = [{
+                value: 40,
+                name: '情感本',
+                itemStyle: {
+                    color: '#EC4899'
+                }
+            }, {
+                value: 35,
+                name: '硬核推理本',
+                itemStyle: {
+                    color: '#4F46E5'
+                }
+            }, {
+                value: 15,
+                name: '恐怖本',
+                itemStyle: {
+                    color: '#1F2937'
+                }
+            }, {
+                value: 10,
+                name: '机制本',
+                itemStyle: {
+                    color: '#10B981'
+                }
+            }];
+
+            // 玩家偏好数据
+            const elementData = [{
+                value: 65,
+                name: '剧情深度',
+                itemStyle: {
+                    color: '#8B5CF6'
+                }
+            }, {
+                value: 58,
+                name: '角色塑造',
+                itemStyle: {
+                    color: '#EC4899'
+                }
+            }, {
+                value: 45,
+                name: '推理难度',
+                itemStyle: {
+                    color: '#4F46E5'
+                }
+            }, {
+                value: 32,
+                name: '沉浸体验',
+                itemStyle: {
+                    color: '#10B981'
+                }
+            }, {
+                value: 25,
+                name: '机制创新',
+                itemStyle: {
+                    color: '#F59E0B'
+                }
+            }];
+
+            // 玩家年龄分布数据
+            const ageData = [{
+                value: 35,
+                name: '18-22岁',
+                itemStyle: {
+                    color: '#3B82F6'
+                }
+            }, {
+                value: 28,
+                name: '23-25岁',
+                itemStyle: {
+                    color: '#6366F1'
+                }
+            }, {
+                value: 18,
+                name: '26-30岁',
+                itemStyle: {
+                    color: '#8B5CF6'
+                }
+            }, {
+                value: 12,
+                name: '31-35岁',
+                itemStyle: {
+                    color: '#A855F7'
+                }
+            }, {
+                value: 7,
+                name: '36岁以上',
+                itemStyle: {
+                    color: '#C084FC'
+                }
+            }];
+
+            // 复玩率数据
+            const replayData = [{
+                value: 28,
+                name: '机制本',
+                itemStyle: {
+                    color: '#F59E0B'
+                }
+            }, {
+                value: 20,
+                name: '阵营本',
+                itemStyle: {
+                    color: '#10B981'
+                }
+            }, {
+                value: 15,
+                name: '恐怖本',
+                itemStyle: {
+                    color: '#1F2937'
+                }
+            }, {
+                value: 8,
+                name: '情感本',
+                itemStyle: {
+                    color: '#EC4899'
+                }
+            }, {
+                value: 5,
+                name: '硬核推理本',
+                itemStyle: {
+                    color: '#4F46E5'
+                }
+            }];
+
+            // 创建图表函数
+            function createChart(chartId, data, isDoughnut = false) {
+                const chart = echarts.init(document.getElementById(chartId));
+
+                const option = {
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{a} <br/>{b}: {c} ({d}%)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        textStyle: {
+                            color: '#1F2937'
+                        },
+                        borderColor: '#E5E7EB',
+                        borderWidth: 1
+                    },
+                    legend: {
+                        type: 'scroll',
+                        orient: 'horizontal',
+                        bottom: 10,
+                        textStyle: {
+                            color: '#6B7280'
+                        },
+                        pageIconColor: '#4F46E5',
+                        pageTextStyle: {
+                            color: '#6B7280'
+                        }
+                    },
+                    series: [{
+                        name: chartId === 'typeChart' ? '剧本类型' : chartId === 'elementChart' ? '看重元素' : chartId === 'ageChart' ? '年龄分布' : '复玩率',
+                        type: 'pie',
+                        radius: isDoughnut ? ['40%', '70%'] : '70%',
+                        center: ['50%', '45%'],
+                        data: data,
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        },
+                        label: {
+                            formatter: '{b}: {d}%',
+                            fontStyle: 'normal',
+                            fontSize: 12
+                        }
+                    }],
+                    animationDuration: 1000,
+                    animationEasing: 'elasticOut'
+                };
+
+                chart.setOption(option);
+                return chart;
+            }
+
+            // 初始化所有图表
+            let typeChart = createChart('typeChart', typeData);
+            let elementChart = createChart('elementChart', elementData);
+            let ageChart = createChart('ageChart', ageData);
+            let replayChart = createChart('replayChart', replayData);
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', function() {
+                typeChart.resize();
+                elementChart.resize();
+                ageChart.resize();
+                replayChart.resize();
+            });
+
+            // 饼图/环形图切换按钮
+            document.getElementById('type-pie').addEventListener('click', function() {
+                typeChart = createChart('typeChart', typeData, false);
+                this.classList.remove('bg-gray-200', 'text-gray-700');
+                this.classList.add('bg-primary', 'text-white');
+                document.getElementById('type-doughnut').classList.remove('bg-primary', 'text-white');
+                document.getElementById('type-doughnut').classList.add('bg-gray-200', 'text-gray-700');
+            });
+
+            document.getElementById('type-doughnut').addEventListener('click', function() {
+                typeChart = createChart('typeChart', typeData, true);
+                this.classList.remove('bg-gray-200', 'text-gray-700');
+                this.classList.add('bg-primary', 'text-white');
+                document.getElementById('type-pie').classList.remove('bg-primary', 'text-white');
+                document.getElementById('type-pie').classList.add('bg-gray-200', 'text-gray-700');
+            });
+
+            // 为其他图表添加类似的切换事件
+            function setupChartToggle(pieId, doughnutId, chartId, data) {
+                document.getElementById(pieId).addEventListener('click', function() {
+                    const chart = createChart(chartId, data, false);
+                    this.classList.remove('bg-gray-200', 'text-gray-700');
+                    this.classList.add('bg-primary', 'text-white');
+                    document.getElementById(doughnutId).classList.remove('bg-primary', 'text-white');
+                    document.getElementById(doughnutId).classList.add('bg-gray-200', 'text-gray-700');
+                });
+
+                document.getElementById(doughnutId).addEventListener('click', function() {
+                    const chart = createChart(chartId, data, true);
+                    this.classList.remove('bg-gray-200', 'text-gray-700');
+                    this.classList.add('bg-primary', 'text-white');
+                    document.getElementById(pieId).classList.remove('bg-primary', 'text-white');
+                    document.getElementById(pieId).classList.add('bg-gray-200', 'text-gray-700');
+                });
+            }
+
+            setupChartToggle('element-pie', 'element-doughnut', 'elementChart', elementData);
+            setupChartToggle('age-pie', 'age-doughnut', 'ageChart', ageData);
+            setupChartToggle('replay-pie', 'replay-doughnut', 'replayChart', replayData);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新手教程 - 剧本杀之家</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E94560', // 主色调：红色，代表悬疑和激情
+                        secondary: '#1A1A2E', // 辅助色：深蓝，代表神秘感
+                        tertiary: '#16213E', // 第三色：暗蓝，代表沉浸感
+                        accent: '#FFC107', // 强调色：金色，代表重要元素
+                        neutral: '#F5F5F5', // 中性色：浅灰，用于背景
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    }
+                },
+            }
+        }
+    </script>
+    <script>
+        window.addEventListener('load', () => {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const loginButton = document.getElementById('loginButton');
+            const userProfileButton = document.getElementById('userProfileButton');
+            const mobileUserProfileButton = document.getElementById('mobileUserProfileButton');
+
+            if (loggedInUser) {
+                loginButton.style.display = 'none';
+                userProfileButton.style.display = 'flex';
+                mobileUserProfileButton.style.display = 'flex';
+                const currentUsernameElements = document.querySelectorAll('#currentUsername, #mobileCurrentUsername, #profileUsername, #displayUsername');
+                currentUsernameElements.forEach(element => {
+                    element.textContent = loggedInUser;
+                });
+
+                // 查找用户并显示密码
+                const user = users.find(user => user.username === loggedInUser);
+                if (user) {
+                    document.getElementById('displayPassword').textContent = user.password;
+                }
+            } else {
+                loginButton.style.display = 'flex';
+                userProfileButton.style.display = 'none';
+                mobileUserProfileButton.style.display = 'none';
+            }
+        });
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities { .content-auto { content-visibility: auto; } .text-shadow { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); } .text-shadow-lg { text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); } .bg-gradient-overlay { background: linear-gradient(to bottom, rgba(0,
+        0, 0, 0.2), rgba(0, 0, 0, 0.7)); } .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; } }
+    </style>
+</head>
+
+<body class="font-inter bg-neutral text-gray-800 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <img src="logo.jpg" alt="海棠春logo" class="h-8 sm:h-10 object-contain">
+                    <span class="text-xl sm:text-2xl font-bold text-white">海棠春</span>
+                </div>
+
+                <!-- 桌面导航 -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="index-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">首页</a>
+                    <a href="script-library-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">剧本库</a>
+                    <a href="session-hall-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">组局大厅</a>
+                    <a href="creator-platform-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">创作者平台</a>
+                    <a href="newbie-guide-JYLY.html" class="text-primary hover:text-primary/80 transition-colors font-medium">新手教程</a>
+                    <a href="about-us-JYLY.html" class="text-white hover:text-primary transition-colors font-medium">关于我们</a>
+                </nav>
+
+                <!-- 用户操作区 -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative hidden sm:block">
+                        <input type="text" placeholder="搜索教程..." class="bg-white/10 backdrop-blur-sm text-white placeholder-white/60 pl-10 pr-4 py-2 rounded-full w-48 lg:w-64 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                    </div>
+                    <button id="loginButton" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full transition-all flex items-center space-x-1">
+                        <i class="fa fa-user-circle"></i>
+                        <span class="hidden sm:inline">登录/注册</span>
+                    </button>
+                    <!-- 移动端菜单按钮 -->
+                    <button id="mobileMenuButton" class="md:hidden text-white text-xl">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 移动端导航菜单 -->
+        <div id="mobileMenu" class="md:hidden bg-secondary/95 backdrop-blur-md absolute w-full left-0 top-full transform -translate-y-full opacity-0 transition-all duration-300 pointer-events-none">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex flex-col space-y-4">
+                    <a href="index-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">首页</a>
+                    <a href="script-library-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">剧本库</a>
+                    <a href="session-hall-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">组局大厅</a>
+                    <a href="creator-platform-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">创作者平台</a>
+                    <a href="newbie-guide-JYLY.html" class="text-primary hover:text-primary/80 transition-colors font-medium py-2">新手教程</a>
+                    <a href="about-us-JYLY.html" class="text-white hover:text-primary transition-colors font-medium py-2">关于我们</a>
+                    <div class="relative mt-2">
+                        <input type="text" placeholder="搜索教程..." class="bg-white/10 backdrop-blur-sm text-white placeholder-white/60 pl-10 pr-4 py-2 rounded-full w-full focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">用户登录</h3>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-user"></i>
+                            </span>
+                            <input type="text" id="username" placeholder="请输入用户名" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fa fa-lock"></i>
+                            </span>
+                            <input type="password" id="password" placeholder="请输入密码" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    <button type="button" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all">登录</button>
+                </form>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p class="text-center text-sm text-gray-600">还没有账号？<a href="#" class="text-primary hover:underline">立即注册</a></p>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="social-icon bg-[#07C160]/10 hover:bg-[#07C160]/20 text-[#07C160] p-2 rounded-full transition-all">
+                            <i class="fa fa-weixin text-xl"></i>
+                        </button>
+                        <button class="social-icon bg-[#E6162D]/10 hover:bg-[#E6162D]/20 text-[#E6162D] p-2 rounded-full transition-all">
+                            <i class="fa fa-weibo text-xl"></i>
+                        </button>
+                        <button class="social-icon bg-[#12B7F5]/10 hover:bg-[#12B7F5]/20 text-[#12B7F5] p-2 rounded-full transition-all">
+                            <i class="fa fa-qq text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面标题区 -->
+    <section class="relative h-40 md:h-60 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-secondary to-tertiary"></div>
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center relative z-10">
+            <div>
+                <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-white text-shadow-lg">新手教程</h1>
+                <p class="text-white/80 mt-2">从这里开始你的剧本杀之旅</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 面包屑导航 -->
+    <section class="py-4 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center text-sm text-gray-600">
+                <a href="index-JYLY.html" class="hover:text-primary">首页</a>
+                <span class="mx-2">/</span>
+                <span class="text-primary">新手教程</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 新手教程内容区 -->
+    <section class="py-10 bg-neutral">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- 新手入门指南 -->
+            <div class="bg-white rounded-xl shadow-md p-8 mb-8">
+                <h2 class="text-2xl font-bold mb-6">新手入门指南</h2>
+
+                <div class="space-y-8">
+                    <!-- 什么是剧本杀 -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <span class="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center mr-3">1</span> 什么是剧本杀？
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="md:col-span-2">
+                                <p class="mb-4">剧本杀是一种角色扮演推理游戏，通常由5-10名玩家参与。每个玩家会分配一个角色剧本，其中包含角色的背景故事、秘密和任务。游戏的核心是通过推理、交流和互动，揭开案件真相或完成各自的任务。</p>
+                                <p>剧本杀起源于欧美的谋杀之谜游戏，近年来在中国迅速流行，成为一种热门的社交娱乐方式。它不仅考验玩家的逻辑思维和推理能力，还能锻炼表达能力和团队协作能力。</p>
+                            </div>
+                            <div class="relative rounded-lg overflow-hidden">
+                                <img src="https://picsum.photos/id/1070/600/400" alt="剧本杀游戏现场" class="w-full h-64 object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+                                    <p class="text-white p-4">剧本杀游戏现场</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 剧本杀基本流程 -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <span class="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center mr-3">2</span> 剧本杀基本流程
+                        </h3>
+                        <div class="space-y-6">
+                            <div class="flex">
+                                <div class="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mr-4 shrink-0">
+                                    <i class="fa fa-users text-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium mb-2">1. 选择剧本</h4>
+                                    <p>根据参与人数和兴趣选择合适的剧本。剧本类型多样，包括硬核推理、情感沉浸、恐怖惊悚、机制阵营等。</p>
+                                </div>
+                            </div>
+
+                            <div class="flex">
+                                <div class="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mr-4 shrink-0">
+                                    <i class="fa fa-book text-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium mb-2">2. 阅读剧本</h4>
+                                    <p>玩家各自阅读自己的角色剧本，了解角色背景、秘密和任务。阅读时需注意保密自己的关键信息。</p>
+                                </div>
+                            </div>
+
+                            <div class="flex">
+                                <div class="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mr-4 shrink-0">
+                                    <i class="fa fa-comments text-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium mb-2">3. 自我介绍与讨论</h4>
+                                    <p>玩家依次进行自我介绍，分享角色基本信息。随后进入自由讨论环节，玩家可以互相提问、交换线索。</p>
+                                </div>
+                            </div>
+
+                            <div class="flex">
+                                <div class="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mr-4 shrink-0">
+                                    <i class="fa fa-search text-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium mb-2">4. 搜证环节</h4>
+                                    <p>玩家轮流进行搜证，获取更多线索。搜证方式多样，可能是现场搜证、卡片抽证或其他机制。</p>
+                                </div>
+                            </div>
+
+                            <div class="flex">
+                                <div class="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mr-4 shrink-0">
+                                    <i class="fa fa-gavel text-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium mb-2">5. 推理与投票</h4>
+                                    <p>玩家根据收集的线索进行推理，指认凶手或完成任务。投票结束后，主持人公布真相，解释剧情。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 剧本杀基本术语 -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <span class="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center mr-3">3</span> 剧本杀基本术语
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <h4 class="font-medium mb-2">DM</h4>
+                                <p class="text-gray-600">Dungeon Master的缩写，即游戏主持人，负责引导游戏流程、把控节奏和解释剧情。</p>
+                            </div>
+
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <h4 class="font-medium mb-2">NPC</h4>
+                                <p class="text-gray-600">Non-Player Character的缩写，即非玩家角色，通常由DM扮演，为玩家提供信息或推动剧情发展。</p>
+                            </div>
+
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <h4 class="font-medium mb-2">凶手</h4>
+                                <p class="text-gray-600">剧本中的罪犯，通常需要隐藏自己的身份和动机，避免被其他玩家指认。</p>
+                            </div>
+
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <h4 class="font-medium mb-2">推土机</h4>
+                                <p class="text-gray-600">指专注于推理、破解谜题的玩家，通常对案件真相有强烈的追求。</p>
+                            </div>
+
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <h4 class="font-medium mb-2">水龙头</h4>
+                                <p class="text-gray-600">指容易被剧情打动、情感丰富的玩家，在情感本中容易投入感情并落泪。</p>
+                            </div>
+
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <h4 class="font-medium mb-2">OB</h4>
+                                <p class="text-gray-600">Observer的缩写，即旁观者，指不参与游戏，仅观看游戏过程的人。</p>
+                            </div>
+
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <h4 class="font-medium mb-2">复盘</h4>
+                                <p class="text-gray-600">游戏结束后，DM对整个剧情和真相的解释，包括凶手的作案手法和动机。</p>
+                            </div>
+
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <h4 class="font-medium mb-2">反串</h4>
+                                <p class="text-gray-600">指玩家扮演与自己性别不同的角色，在剧本杀中较为常见。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 新手常见问题 -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <span class="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center mr-3">4</span> 新手常见问题
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <button class="w-full flex justify-between items-center p-4 text-left focus:outline-none faq-toggle">
+                                    <span class="font-medium">第一次玩剧本杀应该注意什么？</span>
+                                    <i class="fa fa-chevron-down text-gray-400 transition-transform"></i>
+                                </button>
+                                <div class="px-4 pb-4 hidden faq-content">
+                                    <p class="text-gray-600">第一次玩剧本杀，建议选择难度适中的新手本，避免选择过于复杂的硬核推理本。阅读剧本时要仔细，记住自己的关键信息和任务。游戏过程中要积极参与讨论，但也不要过于紧张，放松心态享受游戏乐趣。如果遇到不明白的规则，可以随时向DM提问。</p>
+                                </div>
+                            </div>
+
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <button class="w-full flex justify-between items-center p-4 text-left focus:outline-none faq-toggle">
+                                    <span class="font-medium">如何隐藏自己是凶手的身份？</span>
+                                    <i class="fa fa-chevron-down text-gray-400 transition-transform"></i>
+                                </button>
+                                <div class="px-4 pb-4 hidden faq-content">
+                                    <p class="text-gray-600">作为凶手，首先要仔细阅读剧本，了解自己的作案手法和时间线，准备好合理的借口。在讨论中，可以适当转移注意力，将嫌疑引向其他玩家。对于关键线索，可以尝试否认或编造合理的解释。但不要过于强硬或激动，保持冷静和自然的态度。</p>
+                                </div>
+                            </div>
+
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <button class="w-full flex justify-between items-center p-4 text-left focus:outline-none faq-toggle">
+                                    <span class="font-medium">如何提高自己的推理能力？</span>
+                                    <i class="fa fa-chevron-down text-gray-400 transition-transform"></i>
+                                </button>
+                                <div class="px-4 pb-4 hidden faq-content">
+                                    <p class="text-gray-600">提高推理能力需要多玩多练，积累经验。在游戏过程中，要注意倾听其他玩家的发言，记录关键信息和时间线。学会分析线索之间的关联，尝试还原事件的全貌。可以参考一些推理小说或影视作品，学习其中的推理技巧和思维方式。此外，与其他玩家交流心得和经验也是提高推理能力的有效方法。</p>
+                                </div>
+                            </div>
+
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <button class="w-full flex justify-between items-center p-4 text-left focus:outline-none faq-toggle">
+                                    <span class="font-medium">剧本杀适合什么人群？</span>
+                                    <i class="fa fa-chevron-down text-gray-400 transition-transform"></i>
+                                </button>
+                                <div class="px-4 pb-4 hidden faq-content">
+                                    <p class="text-gray-600">剧本杀适合喜欢推理、角色扮演和社交的人群。它可以锻炼逻辑思维、表达能力和团队协作能力，同时也是一种很好的放松和社交方式。无论是学生、上班族还是退休人员，只要对推理游戏感兴趣，都可以尝试剧本杀。不同类型的剧本也可以满足不同人群的需求，例如硬核推理本适合逻辑思维强的玩家，情感本适合喜欢沉浸剧情的玩家，机制本适合喜欢策略和互动的玩家。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 剧本杀类型推荐 -->
+            <div class="bg-white rounded-xl shadow-md p-8 mb-8">
+                <h2 class="text-2xl font-bold mb-6">剧本杀类型推荐</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- 硬核推理 -->
+                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all">
+                        <div class="relative">
+                            <img src="https://picsum.photos/id/1070/600/400" alt="硬核推理剧本杀" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                                <div class="p-4">
+                                    <h3 class="text-white font-bold text-xl">硬核推理</h3>
+                                    <p class="text-white/80 text-sm">适合逻辑思维强的玩家</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-gray-600 mb-4">以复杂的案件和严密的逻辑推理为核心，需要玩家仔细分析线索，还原案件真相。适合喜欢挑战智力、享受推理乐趣的玩家。</p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <span class="text-yellow-500 flex items-center">
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                    </span>
+                                    <span class="text-gray-500 text-sm ml-2">难度：5/5</span>
+                                </div>
+                                <a href="#" class="text-primary hover:underline">查看剧本</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 情感沉浸 -->
+                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all">
+                        <div class="relative">
+                            <img src="https://picsum.photos/id/1074/600/400" alt="情感沉浸剧本杀" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                                <div class="p-4">
+                                    <h3 class="text-white font-bold text-xl">情感沉浸</h3>
+                                    <p class="text-white/80 text-sm">适合情感丰富的玩家</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-gray-600 mb-4">以细腻的情感描写和动人的故事为核心，需要玩家深入角色内心，体验角色的情感和经历。适合喜欢沉浸剧情、情感丰富的玩家。</p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <span class="text-yellow-500 flex items-center">
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star-o"></i>
+                                    </span>
+                                    <span class="text-gray-500 text-sm ml-2">难度：3/5</span>
+                                </div>
+                                <a href="#" class="text-primary hover:underline">查看剧本</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 恐怖惊悚 -->
+                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all">
+                        <div class="relative">
+                            <img src="https://picsum.photos/id/1062/600/400" alt="恐怖惊悚剧本杀" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                                <div class="p-4">
+                                    <h3 class="text-white font-bold text-xl">恐怖惊悚</h3>
+                                    <p class="text-white/80 text-sm">适合喜欢刺激的玩家</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-gray-600 mb-4">以恐怖、惊悚的氛围和情节为核心，通常会有恐怖的场景布置、音效和剧情。需要玩家有一定的心理承受能力。适合喜欢刺激、追求心跳体验的玩家。</p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <span class="text-yellow-500 flex items-center">
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star-half-o"></i>
+                                        <i class="fa fa-star-o"></i>
+                                    </span>
+                                    <span class="text-gray-500 text-sm ml-2">难度：3.5/5</span>
+                                </div>
+                                <a href="#" class="text-primary hover:underline">查看剧本</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 机制阵营 -->
+                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all">
+                        <div class="relative">
+                            <img src="https://picsum.photos/id/1071/600/400" alt="机制阵营剧本杀" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                                <div class="p-4">
+                                    <h3 class="text-white font-bold text-xl">机制阵营</h3>
+                                    <p class="text-white/80 text-sm">适合喜欢策略的玩家</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-gray-600 mb-4">以各种游戏机制和阵营对抗为核心，玩家需要通过策略和互动来完成任务或击败对手。适合喜欢策略、竞争和互动的玩家。</p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <span class="text-yellow-500 flex items-center">
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star-half-o"></i>
+                                    </span>
+                                    <span class="text-gray-500 text-sm ml-2">难度：4/5</span>
+                                </div>
+                                <a href="#" class="text-primary hover:underline">查看剧本</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 欢乐撕逼 -->
+                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all">
+                        <div class="relative">
+                            <img src="https://picsum.photos/id/1075/600/400" alt="欢乐撕逼剧本杀" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                                <div class="p-4">
+                                    <h3 class="text-white font-bold text-xl">欢乐撕逼</h3>
+                                    <p class="text-white/80 text-sm">适合喜欢轻松的玩家</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-gray-600 mb-4">以轻松幽默的剧情和互动为核心，玩家可以尽情调侃、吐槽和互相攻击。适合喜欢轻松、搞笑氛围的玩家，也是聚会和团建的不错选择。</p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <span class="text-yellow-500 flex items-center">
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star-o"></i>
+                                        <i class="fa fa-star-o"></i>
+                                    </span>
+                                    <span class="text-gray-500 text-sm ml-2">难度：2/5</span>
+                                </div>
+                                <a href="#" class="text-primary hover:underline">查看剧本</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 科幻奇幻 -->
+                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all">
+                        <div class="relative">
+                            <img src="https://picsum.photos/id/1072/600/400" alt="科幻奇幻剧本杀" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                                <div class="p-4">
+                                    <h3 class="text-white font-bold text-xl">科幻奇幻</h3>
+                                    <p class="text-white/80 text-sm">适合喜欢想象的玩家</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-gray-600 mb-4">以科幻、奇幻的世界观和设定为核心，通常包含超自然现象、未来科技等元素。需要玩家有较强的想象力和接受能力。适合喜欢科幻、奇幻题材的玩家。</p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <!-- 这里原代码未完整，可根据实际情况补充 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // 获取所有的问题按钮
+        const faqToggles = document.querySelectorAll('.faq-toggle');
+
+        // 为每个问题按钮添加点击事件监听器
+        faqToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                // 获取对应的答案内容元素
+                const content = toggle.nextElementSibling;
+                // 切换答案内容的显示状态
+                content.classList.toggle('hidden');
+                // 切换箭头图标方向
+                const icon = toggle.querySelector('i');
+                icon.classList.toggle('fa-chevron-down');
+                icon.classList.toggle('fa-chevron-up');
+            });
+        });
+    </script>
+
+
+    <!-- 视频教程 -->
+    <div class="bg-white rounded-xl shadow-md p-8 mb-8">
+        <h2 class="text-2xl font-bold mb-6">视频</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- 添加a标签包裹整个视频卡片 -->
+            <a href="movie.mp4" target="_blank" class="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all group">
+                <div class="relative">
+                    <img src="cover.jpg" alt="剧本杀入门指南" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="w-16 h-16 bg-primary/80 rounded-full flex items-center justify-center group-hover:bg-primary transition-colors">
+                            <i class="fa fa-play text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                        00:16
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-bold mb-2">如何一秒爱上剧本杀</h3>
+                    <p class="text-gray-500 text-sm">玩的就是这个剧本杀 爽！</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>

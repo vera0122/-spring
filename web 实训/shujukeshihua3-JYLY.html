@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据可视化流程图 - 剧本杀体验流程</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <!-- 引入 D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- 配置 Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5', // 主色调：深蓝（代表信任与专业）
+                        secondary: '#EC4899', // 辅助色：粉紫（代表创意与娱乐）
+                        neutral: '#1F2937', // 中性色：深灰
+                        'neutral-light': '#F3F4F6', // 浅灰背景
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities { .content-auto { content-visibility: auto; } .card-shadow { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); } .flow-node { transition: all 0.3s ease; } .flow-node:hover { transform: translateY(-3px);
+        filter: brightness(1.05); } .stat-card { transition: all 0.3s ease; } .stat-card:hover { transform: scale(1.02); } }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-inter text-neutral">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-sitemap text-primary text-2xl mr-3"></i>
+                    <span class="text-xl font-bold">DataViz</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-primary font-medium hover:text-primary/80 transition-colors">首页</a>
+                    <a href="#" class="text-gray-600 hover:text-primary transition-colors">图表库</a>
+                    <a href="#" class="text-gray-600 hover:text-primary transition-colors">关于我们</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- 页面标题 -->
+        <div class="mb-8 text-center">
+            <h1 class="text-[clamp(2rem,5vw,3rem)] font-bold text-neutral mb-2">剧本杀体验全流程</h1>
+            <p class="text-gray-600 max-w-3xl mx-auto">通过交互式流程图直观了解剧本杀从预约到结束的完整体验流程，帮助新手快速上手，老手优化体验。</p>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 card-shadow stat-card border-l-4 border-primary">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">平均体验时长</p>
+                        <h3 class="text-3xl font-bold text-neutral mt-1">4-6小时</h3>
+                        <p class="text-gray-500 text-sm mt-2">根据剧本难度和玩家人数有所不同</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <i class="fa-solid fa-clock text-primary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow stat-card border-l-4 border-secondary">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">最佳人数</p>
+                        <h3 class="text-3xl font-bold text-neutral mt-1">6-8人</h3>
+                        <p class="text-gray-500 text-sm mt-2">多数剧本设计为这个人数区间</p>
+                    </div>
+                    <div class="bg-pink-100 p-3 rounded-lg">
+                        <i class="fa-solid fa-users text-secondary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow stat-card border-l-4 border-green-500">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">满意度</p>
+                        <h3 class="text-3xl font-bold text-neutral mt-1">92%</h3>
+                        <p class="text-green-500 text-sm mt-2 flex items-center">
+                            <i class="fa-solid fa-arrow-up mr-1"></i> 3% <span class="text-gray-500 ml-1">vs 去年</span>
+                        </p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <i class="fa-solid fa-smile text-green-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 流程图区域 -->
+        <div class="bg-white rounded-xl p-6 card-shadow mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-neutral">剧本杀完整体验流程</h2>
+                <div class="flex space-x-2">
+                    <button id="zoomIn" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">
+            <i class="fa-solid fa-search-plus mr-1"></i> 放大
+          </button>
+                    <button id="zoomOut" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors">
+            <i class="fa-solid fa-search-minus mr-1"></i> 缩小
+          </button>
+                    <button id="resetView" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors">
+            <i class="fa-solid fa-arrows-to-dot mr-1"></i> 重置
+          </button>
+                </div>
+            </div>
+            <div class="relative w-full overflow-hidden" style="height: 600px;">
+                <svg id="flowchart" class="w-full h-full"></svg>
+            </div>
+            <div class="mt-4 text-sm text-gray-500">
+                <p>点击节点查看详情，使用缩放按钮调整视图大小</p>
+            </div>
+        </div>
+
+        <!-- 流程详情 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 card-shadow">
+                <h3 class="text-lg font-semibold text-neutral mb-4 flex items-center">
+                    <i class="fa-solid fa-lightbulb text-primary mr-2"></i> 新手提示
+                </h3>
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-2"></i>
+                        <span>提前到达门店，预留充足时间阅读剧本</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-2"></i>
+                        <span>与队友沟通角色偏好，避免重复选择相似类型</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-2"></i>
+                        <span>准备好纸笔，记录关键线索和时间线</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-2"></i>
+                        <span>游戏过程中保持专注，避免分心影响体验</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow">
+                <h3 class="text-lg font-semibold text-neutral mb-4 flex items-center">
+                    <i class="fa-solid fa-question-circle text-secondary mr-2"></i> 常见问题
+                </h3>
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-question text-blue-500 mt-1 mr-2"></i>
+                        <span>Q: 需要有表演经验吗？</span>
+                    </li>
+                    <li class="ml-6 text-sm text-gray-600">
+                        A: 不需要，按自己的方式代入角色即可
+                    </li>
+                    <li class="flex items-start mt-2">
+                        <i class="fa-solid fa-question text-blue-500 mt-1 mr-2"></i>
+                        <span>Q: 可以中途退出吗？</span>
+                    </li>
+                    <li class="ml-6 text-sm text-gray-600">
+                        A: 不建议，可能影响其他玩家体验
+                    </li>
+                    <li class="flex items-start mt-2">
+                        <i class="fa-solid fa-question text-blue-500 mt-1 mr-2"></i>
+                        <span>Q: 适合带孩子参加吗？</span>
+                    </li>
+                    <li class="ml-6 text-sm text-gray-600">
+                        A: 部分剧本适合12岁以上青少年，建议提前咨询
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow">
+                <h3 class="text-lg font-semibold text-neutral mb-4 flex items-center">
+                    <i class="fa-solid fa-star text-green-500 mr-2"></i> 流程优化建议
+                </h3>
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-lightbulb text-primary mt-1 mr-2"></i>
+                        <span>选择与好友组队，默契度更高</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-lightbulb text-primary mt-1 mr-2"></i>
+                        <span>根据人数和偏好选择合适难度的剧本</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-lightbulb text-primary mt-1 mr-2"></i>
+                        <span>游戏后进行复盘，交流体验和推理思路</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-lightbulb text-primary mt-1 mr-2"></i>
+                        <span>尝试不同类型的剧本，拓展体验</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 热门剧本推荐 -->
+        <div class="bg-white rounded-xl p-6 card-shadow">
+            <h2 class="text-xl font-semibold text-neutral mb-6">热门剧本推荐</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+                    <img src="https://picsum.photos/400/250?random=1" alt="剧本封面" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="font-semibold text-neutral">《金陵风云》</h3>
+                        <div class="flex items-center mt-1">
+                            <i class="fa-solid fa-star text-yellow-400"></i>
+                            <span class="ml-1">9.2</span>
+                            <span class="ml-2 text-gray-500 text-sm">8-10人</span>
+                            <span class="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded">阵营</span>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-600">民国时期的谍战大戏，多重身份，精彩反转</p>
+                    </div>
+                </div>
+
+                <div class="rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+                    <img src="https://picsum.photos/400/250?random=2" alt="剧本封面" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="font-semibold text-neutral">《雾鸦馆》</h3>
+                        <div class="flex items-center mt-1">
+                            <i class="fa-solid fa-star text-yellow-400"></i>
+                            <span class="ml-1">9.0</span>
+                            <span class="ml-2 text-gray-500 text-sm">6人</span>
+                            <span class="ml-2 bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded">硬核</span>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-600">密室杀人案件，高难度推理，适合逻辑达人</p>
+                    </div>
+                </div>
+
+                <div class="rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+                    <img src="https://picsum.photos/400/250?random=3" alt="剧本封面" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="font-semibold text-neutral">《声声慢》</h3>
+                        <div class="flex items-center mt-1">
+                            <i class="fa-solid fa-star text-yellow-400"></i>
+                            <span class="ml-1">8.9</span>
+                            <span class="ml-2 text-gray-500 text-sm">6人</span>
+                            <span class="ml-2 bg-pink-100 text-pink-800 text-xs px-2 py-0.5 rounded">情感</span>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-600">古风情感沉浸本，爱恨情仇，催人泪下</p>
+                    </div>
+                </div>
+
+                <div class="rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+                    <img src="https://picsum.photos/400/250?random=4" alt="剧本封面" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="font-semibold text-neutral">《青楼》</h3>
+                        <div class="flex items-center mt-1">
+                            <i class="fa-solid fa-star text-yellow-400"></i>
+                            <span class="ml-1">8.7</span>
+                            <span class="ml-2 text-gray-500 text-sm">7人</span>
+                            <span class="ml-2 bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded">机制</span>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-600">古代青楼背景，欢乐机制，适合熟人聚会</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-neutral text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-sitemap text-primary text-2xl mr-3"></i>
+                        <span class="text-xl font-bold">DataViz</span>
+                    </div>
+                    <p class="text-gray-400 mt-2">用数据驱动剧本杀行业发展</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-brands fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-brands fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-brands fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-gray-700 text-center text-gray-400 text-sm">
+                <p>© 2024 DataViz. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 初始化流程图
+        document.addEventListener('DOMContentLoaded', function() {
+            // 流程图数据
+            const flowData = {
+                nodes: [{
+                    id: 'start',
+                    label: '开始',
+                    type: 'start',
+                    x: 200,
+                    y: 50
+                }, {
+                    id: 'choose',
+                    label: '选择剧本',
+                    type: 'process',
+                    x: 200,
+                    y: 150
+                }, {
+                    id: 'booking',
+                    label: '预约场次',
+                    type: 'process',
+                    x: 200,
+                    y: 250
+                }, {
+                    id: 'arrive',
+                    label: '到达门店',
+                    type: 'process',
+                    x: 200,
+                    y: 350
+                }, {
+                    id: 'character',
+                    label: '分配角色',
+                    type: 'process',
+                    x: 200,
+                    y: 450
+                }, {
+                    id: 'read',
+                    label: '阅读剧本',
+                    type: 'process',
+                    x: 200,
+                    y: 550
+                }, {
+                    id: 'game',
+                    label: '游戏进行中',
+                    type: 'process',
+                    x: 200,
+                    y: 650
+                }, {
+                    id: 'end',
+                    label: '游戏结束',
+                    type: 'process',
+                    x: 200,
+                    y: 750
+                }, {
+                    id: 'review',
+                    label: '复盘讨论',
+                    type: 'process',
+                    x: 200,
+                    y: 850
+                }, {
+                    id: 'rating',
+                    label: '评价反馈',
+                    type: 'process',
+                    x: 200,
+                    y: 950
+                }, {
+                    id: 'finish',
+                    label: '结束',
+                    type: 'end',
+                    x: 200,
+                    y: 1050
+                }],
+                links: [{
+                    source: 'start',
+                    target: 'choose',
+                    label: ''
+                }, {
+                    source: 'choose',
+                    target: 'booking',
+                    label: ''
+                }, {
+                    source: 'booking',
+                    target: 'arrive',
+                    label: ''
+                }, {
+                    source: 'arrive',
+                    target: 'character',
+                    label: ''
+                }, {
+                    source: 'character',
+                    target: 'read',
+                    label: ''
+                }, {
+                    source: 'read',
+                    target: 'game',
+                    label: ''
+                }, {
+                    source: 'game',
+                    target: 'end',
+                    label: ''
+                }, {
+                    source: 'end',
+                    target: 'review',
+                    label: ''
+                }, {
+                    source: 'review',
+                    target: 'rating',
+                    label: ''
+                }, {
+                    source: 'rating',
+                    target: 'finish',
+                    label: ''
+                }],
+                // 节点详情
+                details: {
+                    start: {
+                        title: "准备开启剧本杀之旅",
+                        description: "召集好友，确定时间，准备体验一场沉浸式角色扮演游戏。",
+                        tips: ["提前了解剧本类型，选择感兴趣的主题", "确定参与人数，便于选择合适剧本"]
+                    },
+                    choose: {
+                        title: "选择剧本",
+                        description: "根据人数、兴趣和难度选择合适的剧本。",
+                        tips: ["考虑团队成员的偏好和游戏经验", "关注剧本时长，合理安排时间"]
+                    },
+                    booking: {
+                        title: "预约场次",
+                        description: "通过线上或线下渠道预约所选剧本的场次。",
+                        tips: ["提前3-7天预约热门剧本", "确认预约详情，包括时间、地点和费用"]
+                    },
+                    arrive: {
+                        title: "到达门店",
+                        description: "准时到达剧本杀门店，办理入场手续。",
+                        tips: ["建议提前15-30分钟到达", "熟悉门店环境，存放个人物品"]
+                    },
+                    character: {
+                        title: "分配角色",
+                        description: "主持人根据玩家特点分配角色，并简单介绍背景。",
+                        tips: ["向主持人说明角色偏好", "仔细阅读角色简介，了解基本信息"]
+                    },
+                    read: {
+                        title: "阅读剧本",
+                        description: "安静阅读剧本内容，了解角色背景和任务。",
+                        tips: ["重点关注自己的秘密和任务", "记录关键信息和时间线"]
+                    },
+                    game: {
+                        title: "游戏进行中",
+                        description: "通过角色扮演、推理和解谜推进剧情。",
+                        tips: ["充分与其他玩家互动交流", "注意观察环境和道具", "合理隐藏或透露信息"]
+                    },
+                    end: {
+                        title: "游戏结束",
+                        description: "完成所有任务或达到游戏结束条件。",
+                        tips: ["保持良好的游戏礼仪", "整理个人物品"]
+                    },
+                    review: {
+                        title: "复盘讨论",
+                        description: "主持人讲解剧情全貌，玩家交流体验和推理过程。",
+                        tips: ["分享自己的推理思路和发现", "提问未解之谜"]
+                    },
+                    rating: {
+                        title: "评价反馈",
+                        description: "对剧本和店家服务进行评价，提供反馈。",
+                        tips: ["客观评价剧本质量和游戏体验", "提出改进建议"]
+                    },
+                    finish: {
+                        title: "结束",
+                        description: "完成整个剧本杀体验，期待下次相遇。",
+                        tips: ["保存美好回忆", "与好友分享体验"]
+                    }
+                }
+            };
+
+            // 创建SVG
+            const svg = d3.select("#flowchart")
+                .attr("viewBox", "0 0 800 1200")
+                .attr("preserveAspectRatio", "xMidYMid meet");
+
+            // 创建缩放控制器
+            const zoom = d3.zoom()
+                .scaleExtent([0.5, 2])
+                .on("zoom", function(event) {
+                    container.attr("transform", event.transform);
+                });
+
+            svg.call(zoom);
+
+            // 创建容器
+            const container = svg.append("g");
+
+            // 绘制连接线
+            const links = container.selectAll(".link")
+                .data(flowData.links)
+                .enter()
+                .append("g")
+                .attr("class", "link");
+
+            links.append("path")
+                .attr("d", function(d) {
+                    const source = flowData.nodes.find(node => node.id === d.source);
+                    const target = flowData.nodes.find(node => node.id === d.target);
+                    return `M${source.x},${source.y+40} L${target.x},${target.y}`;
+                })
+                .attr("stroke", "#9CA3AF")
+                .attr("stroke-width", 2)
+                .attr("fill", "none");
+
+            links.append("text")
+                .attr("x", function(d) {
+                    const source = flowData.nodes.find(node => node.id === d.source);
+                    const target = flowData.nodes.find(node => node.id === d.target);
+                    return (source.x + target.x) / 2;
+                })
+                .attr("y", function(d) {
+                    const source = flowData.nodes.find(node => node.id === d.source);
+                    const target = flowData.nodes.find(node => node.id === d.target);
+                    return (source.y + target.y) / 2 - 10;
+                })
+                .attr("text-anchor", "middle")
+                .attr("fill", "#6B7280")
+                .text(function(d) {
+                    return d.label;
+                });
+
+            // 绘制节点
+            const nodes = container.selectAll(".node")
+                .data(flowData.nodes)
+                .enter()
+                .append("g")
+                .attr("class", "node flow-node")
+                .attr("transform", function(d) {
+                    return `translate(${d.x},${d.y})`
+                })
+                .on("click", function(event, d) {
+                    showNodeDetails(d.id);
+                });
+
+            // 根据节点类型设置不同的形状
+            nodes.each(function(d) {
+                const node = d3.select(this);
+
+                if (d.type === 'start' || d.type === 'end') {
+                    // 圆形节点
+                    node.append("circle")
+                        .attr("r", 30)
+                        .attr("fill", d.type === 'start' ? '#4F46E5' : '#10B981')
+                        .attr("stroke", "#374151")
+                        .attr("stroke-width", 2);
+                } else {
+                    // 矩形节点
+                    node.append("rect")
+                        .attr("x", -60)
+                        .attr("y", -20)
+                        .attr("width", 120)
+                        .attr("height", 40)
+                        .attr("rx", 8)
+                        .attr("fill", "#EC4899")
+                        .attr("stroke", "#374151")
+                        .attr("stroke-width", 2);
+                }
+
+                // 添加标签
+                node.append("text")
+                    .attr("x", 0)
+                    .attr("y", 5)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-weight", "bold")
+                    .text(d.label);
+            });
+
+            // 显示节点详情
+            function showNodeDetails(nodeId) {
+                const details = flowData.details[nodeId];
+
+                // 创建模态框
+                let modal = d3.select("body").select("#node-detail-modal");
+
+                if (modal.empty()) {
+                    modal = d3.select("body").append("div")
+                        .attr("id", "node-detail-modal")
+                        .attr("class", "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50");
+
+                    const modalContent = modal.append("div")
+                        .attr("class", "bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto p-6");
+
+                    modalContent.append("h3")
+                        .attr("class", "text-xl font-bold text-neutral mb-4")
+                        .attr("id", "modal-title");
+
+                    modalContent.append("p")
+                        .attr("class", "text-gray-700 mb-4")
+                        .attr("id", "modal-description");
+
+                    const tipsContainer = modalContent.append("div")
+                        .attr("class", "mb-4");
+
+                    tipsContainer.append("h4")
+                        .attr("class", "font-semibold text-gray-700 mb-2")
+                        .text("小贴士：");
+
+                    tipsContainer.append("ul")
+                        .attr("id", "modal-tips")
+                        .attr("class", "list-disc list-inside text-gray-600 space-y-1");
+
+                    modalContent.append("button")
+                        .attr("class", "mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors")
+                        .text("关闭")
+                        .on("click", function() {
+                            modal.remove();
+                        });
+                }
+
+                // 更新模态框内容
+                d3.select("#modal-title").text(details.title);
+                d3.select("#modal-description").text(details.description);
+
+                const tipsList = d3.select("#modal-tips")
+                    .selectAll("li")
+                    .data(details.tips);
+
+                tipsList.enter()
+                    .append("li")
+                    .text(function(d) {
+                        return d;
+                    });
+
+                tipsList.text(function(d) {
+                    return d;
+                });
+
+                tipsList.exit().remove();
+            }
+
+            // 缩放按钮事件
+            d3.select("#zoomIn").on("click", function() {
+                svg.transition()
+                    .duration(750)
+                    .call(zoom.scaleBy, 1.2);
+            });
+
+            d3.select("#zoomOut").on("click", function() {
+                svg.transition()
+                    .duration(750)
+                    .call(zoom.scaleBy, 0.8);
+            });
+
+            d3.select("#resetView").on("click", function() {
+                svg.transition()
+                    .duration(750)
+                    .call(zoom.transform, d3.zoomIdentity);
+            });
+        });
+    </script>
+</body>
+
+</html>

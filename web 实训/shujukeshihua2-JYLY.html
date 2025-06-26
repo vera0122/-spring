@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据可视化折线图 - 剧本杀行业分析</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <!-- 配置 Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5', // 主色调：深蓝（代表信任与专业）
+                        secondary: '#EC4899', // 辅助色：粉紫（代表创意与娱乐）
+                        neutral: '#1F2937', // 中性色：深灰
+                        'neutral-light': '#F3F4F6', // 浅灰背景
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities { .content-auto { content-visibility: auto; } .card-shadow { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); } .chart-container { transition: all 0.3s ease; } .chart-container:hover { transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); } .stat-card { transition: all 0.3s ease; } .stat-card:hover { transform: scale(1.02); } }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-inter text-neutral">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-chart-line text-primary text-2xl mr-3"></i>
+                    <span class="text-xl font-bold">DataViz</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-primary font-medium hover:text-primary/80 transition-colors">首页</a>
+                    <a href="#" class="text-gray-600 hover:text-primary transition-colors">图表库</a>
+                    <a href="#" class="text-gray-600 hover:text-primary transition-colors">关于我们</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- 页面标题 -->
+        <div class="mb-8 text-center">
+            <h1 class="text-[clamp(2rem,5vw,3rem)] font-bold text-neutral mb-2">剧本杀行业趋势分析</h1>
+            <p class="text-gray-600 max-w-3xl mx-auto">通过交互式折线图直观展示剧本杀行业的各类趋势数据，助力玩家选择、店家决策和创作者洞察市场走向。</p>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 card-shadow stat-card border-l-4 border-primary">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">行业增长率</p>
+                        <h3 class="text-3xl font-bold text-neutral mt-1">32.8%</h3>
+                        <p class="text-green-500 text-sm mt-2 flex items-center">
+                            <i class="fa-solid fa-arrow-up mr-1"></i> 5.2% <span class="text-gray-500 ml-1">vs 去年同期</span>
+                        </p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <i class="fa-solid fa-chart-line text-primary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow stat-card border-l-4 border-secondary">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">月活跃用户</p>
+                        <h3 class="text-3xl font-bold text-neutral mt-1">186万+</h3>
+                        <p class="text-green-500 text-sm mt-2 flex items-center">
+                            <i class="fa-solid fa-arrow-up mr-1"></i> 12.7% <span class="text-gray-500 ml-1">vs 上月</span>
+                        </p>
+                    </div>
+                    <div class="bg-pink-100 p-3 rounded-lg">
+                        <i class="fa-solid fa-users text-secondary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow stat-card border-l-4 border-green-500">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">平均消费</p>
+                        <h3 class="text-3xl font-bold text-neutral mt-1">¥198</h3>
+                        <p class="text-green-500 text-sm mt-2 flex items-center">
+                            <i class="fa-solid fa-arrow-up mr-1"></i> ¥12 <span class="text-gray-500 ml-1">vs 上季度</span>
+                        </p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <i class="fa-solid fa-money-bill text-green-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据卡片和图表 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 折线图区域 1：月度销量趋势 -->
+            <div class="bg-white rounded-xl p-6 card-shadow chart-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-neutral">近12个月剧本销量趋势</h2>
+                    <div class="flex space-x-2">
+                        <button id="sales-line" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">折线图</button>
+                        <button id="sales-bar" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors">柱状图</button>
+                    </div>
+                </div>
+                <div class="h-[400px]" id="salesChart"></div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>数据来源：全国主要发行平台统计，单位：千本</p>
+                </div>
+            </div>
+
+            <!-- 折线图区域 2：用户增长率 -->
+            <div class="bg-white rounded-xl p-6 card-shadow chart-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-neutral">月活跃用户增长率</h2>
+                    <div class="flex space-x-2">
+                        <button id="user-line" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">折线图</button>
+                        <button id="user-bar" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors">柱状图</button>
+                    </div>
+                </div>
+                <div class="h-[400px]" id="userChart"></div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>数据来源：主流剧本杀平台用户数据分析，单位：百分比</p>
+                </div>
+            </div>
+
+            <!-- 折线图区域 3：不同类型剧本热度指数 -->
+            <div class="bg-white rounded-xl p-6 card-shadow chart-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-neutral">不同类型剧本热度趋势</h2>
+                    <div class="flex space-x-2">
+                        <button id="type-line" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">折线图</button>
+                        <button id="type-area" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors">面积图</button>
+                    </div>
+                </div>
+                <div class="h-[400px]" id="typeChart"></div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>热度指数基于搜索量、预订量和社交媒体讨论度综合计算</p>
+                </div>
+            </div>
+
+            <!-- 折线图区域 4：平均评分趋势 -->
+            <div class="bg-white rounded-xl p-6 card-shadow chart-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-neutral">新发行剧本平均评分趋势</h2>
+                    <div class="flex space-x-2">
+                        <button id="rating-line" class="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">折线图</button>
+                        <button id="rating-bar" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors">柱状图</button>
+                    </div>
+                </div>
+                <div class="h-[400px]" id="ratingChart"></div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>数据来源：玩家在主流平台对新发行剧本的评分，满分为10分</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据洞察 -->
+        <div class="mt-12 bg-white rounded-xl p-6 card-shadow">
+            <h2 class="text-xl font-semibold text-neutral mb-4">数据洞察与趋势分析</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-primary">
+                    <h3 class="font-medium text-primary mb-2"><i class="fa-solid fa-lightbulb mr-2"></i>季节性规律</h3>
+                    <p class="text-gray-700">剧本杀行业呈现明显的季节性波动，寒暑假和节假日期间销量显著增长，建议店家提前备货。</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-secondary">
+                    <h3 class="font-medium text-secondary mb-2"><i class="fa-solid fa-users mr-2"></i>用户增长</h3>
+                    <p class="text-gray-700">年轻群体仍是主力用户，但30岁以上玩家增速迅猛，已连续6个月增长率超过20%。</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                    <h3 class="font-medium text-green-600 mb-2"><i class="fa-solid fa-line-chart mr-2"></i>类型趋势</h3>
+                    <p class="text-gray-700">情感本热度持续攀升，机制本增长迅速，硬核推理本趋于稳定，恐怖本略有下降。</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-neutral text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-chart-line text-primary text-2xl mr-3"></i>
+                        <span class="text-xl font-bold">DataViz</span>
+                    </div>
+                    <p class="text-gray-400 mt-2">用数据驱动剧本杀行业发展</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-brands fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-brands fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-brands fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-gray-700 text-center text-gray-400 text-sm">
+                <p>© 2024 DataViz. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 销量趋势数据
+            const salesData = {
+                months: ['7月', '8月', '9月', '10月', '11月', '12月', '1月', '2月', '3月', '4月', '5月', '6月'],
+                values: [4.2, 6.8, 5.1, 5.5, 4.9, 6.3, 5.8, 8.2, 7.5, 6.1, 6.9, 7.8]
+            };
+
+            // 用户增长率数据
+            const userData = {
+                months: ['7月', '8月', '9月', '10月', '11月', '12月', '1月', '2月', '3月', '4月', '5月', '6月'],
+                values: [3.2, 5.7, 2.1, 4.3, 3.8, 5.2, 4.7, 8.3, 6.5, 4.9, 5.8, 7.2]
+            };
+
+            // 类型热度数据
+            const typeData = {
+                months: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                series: [{
+                    name: '情感本',
+                    values: [65, 68, 72, 75, 78, 82],
+                    color: '#EC4899'
+                }, {
+                    name: '硬核推理本',
+                    values: [70, 69, 67, 66, 68, 69],
+                    color: '#4F46E5'
+                }, {
+                    name: '恐怖本',
+                    values: [55, 58, 56, 53, 51, 49],
+                    color: '#1F2937'
+                }, {
+                    name: '机制本',
+                    values: [45, 48, 52, 56, 61, 65],
+                    color: '#10B981'
+                }, {
+                    name: '阵营本',
+                    values: [50, 52, 53, 55, 57, 58],
+                    color: '#F59E0B'
+                }]
+            };
+
+            // 评分趋势数据
+            const ratingData = {
+                months: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                values: [8.2, 8.3, 8.5, 8.4, 8.6, 8.7]
+            };
+
+            // 创建折线图函数
+            function createLineChart(chartId, data, isBar = false, isArea = false) {
+                const chart = echarts.init(document.getElementById(chartId));
+
+                // 基础配置
+                const baseOption = {
+                    backgroundColor: '#ffffff',
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        textStyle: {
+                            color: '#1F2937'
+                        },
+                        borderColor: '#E5E7EB',
+                        borderWidth: 1,
+                        axisPointer: {
+                            type: 'cross',
+                            crossStyle: {
+                                color: '#999'
+                            }
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        top: '5%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: data.months,
+                        axisLabel: {
+                            color: '#6B7280'
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: '#E5E7EB'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                            color: '#6B7280'
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: '#E5E7EB'
+                            }
+                        },
+                        splitLine: {
+                            show: true,
+                            lineStyle: {
+                                color: '#F3F4F6'
+                            }
+                        }
+                    },
+                    animationDuration: 1000,
+                    animationEasing: 'elasticOut'
+                };
+
+                // 单系列图表配置
+                if (chartId !== 'typeChart') {
+                    const seriesType = isBar ? 'bar' : 'line';
+                    const color = chartId === 'salesChart' ? '#4F46E5' :
+                        chartId === 'userChart' ? '#EC4899' : '#8B5CF6';
+
+                    baseOption.series = [{
+                        name: chartId === 'salesChart' ? '销量(千本)' : chartId === 'userChart' ? '增长率(%)' : '平均评分',
+                        type: seriesType,
+                        data: data.values,
+                        color: color,
+                        itemStyle: {
+                            color: color
+                        },
+                        areaStyle: isArea ? {
+                            opacity: 0.3,
+                            color: color
+                        } : undefined,
+                        symbol: 'circle',
+                        symbolSize: 8,
+                        lineStyle: {
+                            width: 3,
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 20,
+                                shadowColor: 'rgba(0, 0, 0, 0.2)'
+                            }
+                        }
+                    }];
+                }
+                // 多系列图表配置（类型热度）
+                else {
+                    baseOption.legend = {
+                        type: 'scroll',
+                        orient: 'horizontal',
+                        bottom: 10,
+                        textStyle: {
+                            color: '#6B7280'
+                        },
+                        pageIconColor: '#4F46E5',
+                        pageTextStyle: {
+                            color: '#6B7280'
+                        }
+                    };
+
+                    baseOption.series = data.series.map(series => ({
+                        name: series.name,
+                        type: isBar ? 'bar' : 'line',
+                        data: series.values,
+                        color: series.color,
+                        itemStyle: {
+                            color: series.color
+                        },
+                        areaStyle: isArea ? {
+                            opacity: 0.3,
+                            color: series.color
+                        } : undefined,
+                        symbol: 'circle',
+                        symbolSize: 8,
+                        lineStyle: {
+                            width: 3,
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 20,
+                                shadowColor: 'rgba(0, 0, 0, 0.2)'
+                            }
+                        }
+                    }));
+                }
+
+                chart.setOption(baseOption);
+                return chart;
+            }
+
+            // 初始化所有图表
+            let salesChart = createLineChart('salesChart', salesData);
+            let userChart = createLineChart('userChart', userData);
+            let typeChart = createLineChart('typeChart', typeData);
+            let ratingChart = createLineChart('ratingChart', ratingData);
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', function() {
+                salesChart.resize();
+                userChart.resize();
+                typeChart.resize();
+                ratingChart.resize();
+            });
+
+            // 图表类型切换按钮
+            function setupChartToggle(lineId, barId, chartId, data, isArea = false) {
+                document.getElementById(lineId).addEventListener('click', function() {
+                    const chart = createLineChart(chartId, data, false, isArea);
+                    this.classList.remove('bg-gray-200', 'text-gray-700');
+                    this.classList.add('bg-primary', 'text-white');
+                    document.getElementById(barId).classList.remove('bg-primary', 'text-white');
+                    document.getElementById(barId).classList.add('bg-gray-200', 'text-gray-700');
+                });
+
+                document.getElementById(barId).addEventListener('click', function() {
+                    const chart = createLineChart(chartId, data, true, isArea);
+                    this.classList.remove('bg-gray-200', 'text-gray-700');
+                    this.classList.add('bg-primary', 'text-white');
+                    document.getElementById(lineId).classList.remove('bg-primary', 'text-white');
+                    document.getElementById(lineId).classList.add('bg-gray-200', 'text-gray-700');
+                });
+            }
+
+            setupChartToggle('sales-line', 'sales-bar', 'salesChart');
+            setupChartToggle('user-line', 'user-bar', 'userChart');
+            setupChartToggle('rating-line', 'rating-bar', 'ratingChart');
+
+            // 类型热度图表的特殊处理（支持折线图和面积图切换）
+            document.getElementById('type-line').addEventListener('click', function() {
+                typeChart = createLineChart('typeChart', typeData, false, false);
+                this.classList.remove('bg-gray-200', 'text-gray-700');
+                this.classList.add('bg-primary', 'text-white');
+                document.getElementById('type-area').classList.remove('bg-primary', 'text-white');
+                document.getElementById('type-area').classList.add('bg-gray-200', 'text-gray-700');
+            });
+
+            document.getElementById('type-area').addEventListener('click', function() {
+                typeChart = createLineChart('typeChart', typeData, false, true);
+                this.classList.remove('bg-gray-200', 'text-gray-700');
+                this.classList.add('bg-primary', 'text-white');
+                document.getElementById('type-line').classList.remove('bg-primary', 'text-white');
+                document.getElementById('type-line').classList.add('bg-gray-200', 'text-gray-700');
+            });
+        });
+    </script>
+</body>
+
+</html>
